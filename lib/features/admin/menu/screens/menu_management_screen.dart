@@ -3,12 +3,16 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/confirm_dialog.dart';
+import '../models/category.dart';
 import '../models/product.dart';
 import '../providers/menu_provider.dart';
 import '../widgets/admin_product_card.dart';
+import '../widgets/categories_tab.dart';
 import '../widgets/category_filter_bar.dart';
+import '../widgets/category_form_sheet.dart';
 import '../widgets/menu_search_field.dart';
 import '../widgets/segmented_toggle.dart';
+import 'product_form_screen.dart';
 
 class MenuManagementScreen extends StatefulWidget {
   const MenuManagementScreen({super.key});
@@ -26,7 +30,19 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<void> _confirmDelete(Product product) async {
+  // ---------- Produits ----------
+  Future<void> _openProductForm([Product? product]) async {
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => ProductFormScreen(product: product)),
+    );
+    if (saved == true && mounted) {
+      _showInfo(product == null
+          ? 'Produit ajouté.'
+          : 'Modifications enregistrées.');
+    }
+  }
+
+  Future<void> _confirmDeleteProduct(Product product) async {
     final provider = context.read<MenuProvider>();
     final confirmed = await showConfirmDialog(
       context,
@@ -34,8 +50,54 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
       message: 'Voulez-vous vraiment supprimer "${product.name}" ?',
     );
     if (!confirmed || !mounted) return;
-    await provider.deleteProduct(product.id);
-    if (mounted) _showInfo('"${product.name}" a été supprimé.');
+    try {
+      await provider.deleteProduct(product.id);
+      if (mounted) _showInfo('"${product.name}" a été supprimé.');
+    } catch (_) {
+      if (mounted) _showInfo('Erreur lors de la suppression.');
+    }
+  }
+
+  // ---------- Catégories ----------
+  Future<void> _openCategoryForm([Category? category]) async {
+    final provider = context.read<MenuProvider>();
+    final result = await showCategoryFormSheet(context, category: category);
+    if (result == null || !mounted) return;
+    try {
+      if (category == null) {
+        await provider.addCategory(result);
+        if (mounted) _showInfo('Catégorie ajoutée.');
+      } else {
+        await provider.updateCategory(result);
+        if (mounted) _showInfo('Catégorie modifiée.');
+      }
+    } catch (_) {
+      if (mounted) _showInfo("Erreur lors de l'enregistrement.");
+    }
+  }
+
+  Future<void> _confirmDeleteCategory(Category category) async {
+    final provider = context.read<MenuProvider>();
+
+    if (provider.productCountOf(category.id) > 0) {
+      _showInfo(
+        'Impossible : "${category.name}" contient encore des produits.',
+      );
+      return;
+    }
+
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Supprimer la catégorie',
+      message: 'Voulez-vous vraiment supprimer "${category.name}" ?',
+    );
+    if (!confirmed || !mounted) return;
+    try {
+      await provider.deleteCategory(category.id);
+      if (mounted) _showInfo('Catégorie supprimée.');
+    } catch (_) {
+      if (mounted) _showInfo('Erreur lors de la suppression.');
+    }
   }
 
   @override
@@ -52,13 +114,22 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
               SegmentedToggle(
                 labels: const ['Produits', 'Catégories'],
                 selectedIndex: _tabIndex,
-                onChanged: (i) => setState(() => _tabIndex = i),
+                onChanged: (i) {
+                  // Le champ de recherche est recréé au retour sur l'onglet
+                  // Produits : on réinitialise donc aussi le filtre.
+                  if (i == 1) context.read<MenuProvider>().setSearchQuery('');
+                  setState(() => _tabIndex = i);
+                },
               ),
               const SizedBox(height: 16),
               Expanded(
                 child: _tabIndex == 0
                     ? _buildProductsTab()
-                    : _buildCategoriesPlaceholder(),
+                    : CategoriesTab(
+                        onAdd: _openCategoryForm,
+                        onEdit: _openCategoryForm,
+                        onDelete: _confirmDeleteCategory,
+                      ),
               ),
             ],
           ),
@@ -67,7 +138,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
     );
   }
 
-  // ---------- Header ----------
+  // ---------- En-tête ----------
   Widget _buildHeader() {
     return Row(
       children: [
@@ -82,7 +153,8 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
           child: Text('Gestion du menu', style: AppTextStyles.screenTitle),
         ),
         InkWell(
-          onTap: () => _showInfo("L'écran « Ajouter un produit » arrive à l'étape suivante."),
+          onTap: () =>
+              _tabIndex == 0 ? _openProductForm() : _openCategoryForm(),
           borderRadius: BorderRadius.circular(20),
           child: Container(
             width: 38,
@@ -98,7 +170,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
     );
   }
 
-  // ---------- Products tab ----------
+  // ---------- Onglet Produits ----------
   Widget _buildProductsTab() {
     final menu = context.watch<MenuProvider>();
 
@@ -151,9 +223,8 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                       categoryName: menu.categoryNameOf(product.categoryId),
                       onAvailabilityChanged: (_) =>
                           menu.toggleAvailability(product.id),
-                      onEdit: () => _showInfo(
-                          "L'écran « Modifier un produit » arrive bientôt."),
-                      onDelete: () => _confirmDelete(product),
+                      onEdit: () => _openProductForm(product),
+                      onDelete: () => _confirmDeleteProduct(product),
                     );
                   },
                 ),
@@ -171,23 +242,6 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
           const SizedBox(height: 10),
           Text('Aucun produit trouvé',
               style: AppTextStyles.body.copyWith(color: AppColors.gray)),
-        ],
-      ),
-    );
-  }
-
-  // ---------- Categories tab (implemented in a later step) ----------
-  Widget _buildCategoriesPlaceholder() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.category_outlined, size: 46, color: AppColors.gray),
-          const SizedBox(height: 10),
-          Text(
-            'La gestion des catégories arrive bientôt',
-            style: AppTextStyles.body.copyWith(color: AppColors.gray),
-          ),
         ],
       ),
     );

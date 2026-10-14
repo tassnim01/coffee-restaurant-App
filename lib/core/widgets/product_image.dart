@@ -1,18 +1,21 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-/// Displays a product image from a network URL or an asset,
-/// with loading and error fallbacks. Local file support (image_picker)
-/// will be added with the Add Product screen.
+/// Affiche une image depuis une URL http, un asset ou une data URL base64.
 class ProductImage extends StatelessWidget {
   final String? imageUrl;
   final double size;
+  final double? width;
+  final double? height;
   final double radius;
 
   const ProductImage({
     super.key,
     required this.imageUrl,
     this.size = 68,
+    this.width,
+    this.height,
     this.radius = 14,
   });
 
@@ -20,13 +23,30 @@ class ProductImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: SizedBox(width: size, height: size, child: _buildImage()),
+      child: SizedBox(
+        width: width ?? size,
+        height: height ?? size,
+        child: _buildImage(),
+      ),
     );
   }
 
   Widget _buildImage() {
     final url = imageUrl;
     if (url == null || url.isEmpty) return _placeholder();
+
+    if (url.startsWith('data:image')) {
+      try {
+        return Image.memory(
+          base64Decode(url.split(',').last),
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+          errorBuilder: (_, __, ___) => _placeholder(),
+        );
+      } catch (_) {
+        return _placeholder();
+      }
+    }
 
     if (url.startsWith('http')) {
       return Image.network(
@@ -37,6 +57,7 @@ class ProductImage extends StatelessWidget {
         errorBuilder: (_, __, ___) => _placeholder(),
       );
     }
+
     return Image.asset(
       url,
       fit: BoxFit.cover,

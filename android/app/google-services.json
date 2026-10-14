@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "135480102611",
+    "project_id": "coffee-restaurant-bba57",
+    "storage_bucket": "coffee-restaurant-bba57.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:135480102611:android:2a6630aff596f55a754e26",
+        "android_client_info": {
+          "package_name": "com.example.projet_test"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAabA4_0_uD28XfnxCKZMw42HcvLxiWujM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

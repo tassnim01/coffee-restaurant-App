@@ -2,7 +2,6 @@ import '../models/category.dart';
 import '../models/product.dart';
 
 /// Contract between the app and the data source.
-/// Mock now, Firestore + Storage later.
 abstract class MenuRepository {
   Future<List<Category>> fetchCategories();
   Future<List<Product>> fetchProducts();

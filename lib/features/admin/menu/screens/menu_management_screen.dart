@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/confirm_dialog.dart';
@@ -16,7 +17,9 @@ import '../widgets/segmented_toggle.dart';
 import 'product_form_screen.dart';
 
 class MenuManagementScreen extends StatefulWidget {
-  const MenuManagementScreen({super.key});
+  final VoidCallback? onMenuTap;
+
+  const MenuManagementScreen({super.key, this.onMenuTap});
 
   @override
   State<MenuManagementScreen> createState() => _MenuManagementScreenState();
@@ -37,9 +40,9 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
       MaterialPageRoute(builder: (_) => ProductFormScreen(product: product)),
     );
     if (saved == true && mounted) {
-      _showInfo(product == null
-          ? 'Produit ajouté.'
-          : 'Modifications enregistrées.');
+      _showInfo(
+        product == null ? 'Produit ajouté.' : 'Modifications enregistrées.',
+      );
     }
   }
 
@@ -64,8 +67,8 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
       context,
       product: product,
       categoryName: context.read<MenuProvider>().categoryNameOf(
-            product.categoryId,
-          ),
+        product.categoryId,
+      ),
     );
   }
 
@@ -166,8 +169,13 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
     return Row(
       children: [
         IconButton(
-          onPressed: () => Navigator.of(context).maybePop(),
-          icon: const Icon(Icons.chevron_left_rounded, size: 28),
+          onPressed: widget.onMenuTap ?? () => Navigator.of(context).maybePop(),
+          icon: Icon(
+            widget.onMenuTap != null
+                ? Icons.menu_rounded
+                : Icons.chevron_left_rounded,
+            size: 28,
+          ),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(minWidth: 36),
         ),
@@ -211,7 +219,8 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
             FilledButton(
               onPressed: menu.loadMenu,
               style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.forestGreen),
+                backgroundColor: AppColors.forestGreen,
+              ),
               child: Text('Réessayer', style: AppTextStyles.button),
             ),
           ],
@@ -282,8 +291,10 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
         children: [
           const Icon(Icons.search_off_rounded, size: 46, color: AppColors.gray),
           const SizedBox(height: 10),
-          Text('Aucun produit trouvé',
-              style: AppTextStyles.body.copyWith(color: AppColors.gray)),
+          Text(
+            'Aucun produit trouvé',
+            style: AppTextStyles.body.copyWith(color: AppColors.gray),
+          ),
         ],
       ),
     );

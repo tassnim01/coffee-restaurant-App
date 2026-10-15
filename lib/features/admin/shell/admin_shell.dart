@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../client/screens/clients_screen.dart';
 import '../menu/screens/menu_management_screen.dart';
 import '../orders/screens/orders_screen.dart';
 import 'admin_drawer.dart';
@@ -14,7 +15,7 @@ class AdminShell extends StatefulWidget {
 
 class _AdminShellState extends State<AdminShell> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  int _index = 1; // démarre sur "Gestion des commandes"
+  int _index = 4; // démarre sur "Clients"
 
   void _openDrawer() => _scaffoldKey.currentState?.openDrawer();
 
@@ -53,6 +54,7 @@ class _AdminShellState extends State<AdminShell> {
           OrdersScreen(onMenuTap: _openDrawer),
           ComingSoonScreen(title: 'Statistiques', onMenuTap: _openDrawer),
           MenuManagementScreen(onMenuTap: _openDrawer),
+          ClientsScreen(onMenuTap: _openDrawer),
           ComingSoonScreen(title: 'Paiements', onMenuTap: _openDrawer),
           ComingSoonScreen(title: 'Paramètres', onMenuTap: _openDrawer),
         ],

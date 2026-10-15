@@ -116,13 +116,15 @@ extension OrderStatusX on OrderStatus {
 }
 
 /// Onglets de l'écran "Gestion des commandes".
-enum OrderTab { all, inProgress, ready, delivered }
+enum OrderTab { all, received, inProgress, ready, delivered }
 
 extension OrderTabX on OrderTab {
   String get label {
     switch (this) {
       case OrderTab.all:
         return 'Toutes';
+      case OrderTab.received:
+        return 'Reçues';
       case OrderTab.inProgress:
         return 'En cours';
       case OrderTab.ready:
@@ -136,9 +138,10 @@ extension OrderTabX on OrderTab {
     switch (this) {
       case OrderTab.all:
         return true;
+      case OrderTab.received:
+        return status == OrderStatus.received;
       case OrderTab.inProgress:
-        return status == OrderStatus.received ||
-            status == OrderStatus.preparing;
+        return status == OrderStatus.preparing;
       case OrderTab.ready:
         return status == OrderStatus.ready;
       case OrderTab.delivered:

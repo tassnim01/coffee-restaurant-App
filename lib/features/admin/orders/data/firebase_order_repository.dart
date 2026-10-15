@@ -15,6 +15,7 @@ class FirebaseOrderRepository implements OrderRepository {
   CollectionReference<Map<String, dynamic>> get _orders =>
       _db.collection('orders');
 
+  //Hedhi méthode ta3mel conversion : Document Firestore → Objet RestaurantOrder
   RestaurantOrder _fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     final ts = data['createdAt'];
@@ -22,7 +23,9 @@ class FirebaseOrderRepository implements OrderRepository {
       doc.id,
       data,
       // null = horodatage serveur pas encore reçu (écriture en cours)
-      createdAt: ts is Timestamp ? ts.toDate() : DateTime.now(),
+      createdAt: ts is Timestamp 
+      ? ts.toDate() //if
+      : DateTime.now(), //else
     );
   }
 
@@ -30,8 +33,8 @@ class FirebaseOrderRepository implements OrderRepository {
   Stream<List<RestaurantOrder>> watchOrders() {
     return _orders
         .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map(_fromDoc).toList());
+        .snapshots() //Firestore yeb3ath mise à jour ki données de la requête tetbaddel.
+        .map((snapshot) => snapshot.docs.map(_fromDoc).toList()); //T7awwel chaque document Firestore lel objet RestaurantOrder, puis trajja3 liste.
   }
 
   @override

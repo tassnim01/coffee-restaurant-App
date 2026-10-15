@@ -11,6 +11,7 @@ import '../widgets/categories_tab.dart';
 import '../widgets/category_filter_bar.dart';
 import '../widgets/category_form_sheet.dart';
 import '../widgets/menu_search_field.dart';
+import '../widgets/menu_item_details_sheet.dart';
 import '../widgets/segmented_toggle.dart';
 import 'product_form_screen.dart';
 
@@ -58,6 +59,16 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
     }
   }
 
+  void _showProductDetails(Product product) {
+    showProductDetailsSheet(
+      context,
+      product: product,
+      categoryName: context.read<MenuProvider>().categoryNameOf(
+            product.categoryId,
+          ),
+    );
+  }
+
   // ---------- Catégories ----------
   Future<void> _openCategoryForm([Category? category]) async {
     final provider = context.read<MenuProvider>();
@@ -74,6 +85,17 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
     } catch (_) {
       if (mounted) _showInfo("Erreur lors de l'enregistrement.");
     }
+  }
+
+  void _showCategoryDetails(Category category) {
+    final menu = context.read<MenuProvider>();
+    showCategoryDetailsSheet(
+      context,
+      category: category,
+      products: menu.products
+          .where((product) => product.categoryId == category.id)
+          .toList(),
+    );
   }
 
   Future<void> _confirmDeleteCategory(Category category) async {
@@ -127,6 +149,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     ? _buildProductsTab()
                     : CategoriesTab(
                         onAdd: _openCategoryForm,
+                        onView: _showCategoryDetails,
                         onEdit: _openCategoryForm,
                         onDelete: _confirmDeleteCategory,
                       ),
@@ -223,11 +246,30 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                       categoryName: menu.categoryNameOf(product.categoryId),
                       onAvailabilityChanged: (_) =>
                           menu.toggleAvailability(product.id),
+                      onView: () => _showProductDetails(product),
                       onEdit: () => _openProductForm(product),
                       onDelete: () => _confirmDeleteProduct(product),
                     );
                   },
                 ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: FilledButton.icon(
+              onPressed: _openProductForm,
+              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              label: Text('Ajouter un produit', style: AppTextStyles.button),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.forestGreen,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ),
         ),
       ],
     );

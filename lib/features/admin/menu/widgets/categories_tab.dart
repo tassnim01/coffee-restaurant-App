@@ -9,12 +9,14 @@ import '../providers/menu_provider.dart';
 /// Onglet "Catégories" : liste, modification, suppression, ajout.
 class CategoriesTab extends StatelessWidget {
   final VoidCallback onAdd;
+  final ValueChanged<Category> onView;
   final ValueChanged<Category> onEdit;
   final ValueChanged<Category> onDelete;
 
   const CategoriesTab({
     super.key,
     required this.onAdd,
+    required this.onView,
     required this.onEdit,
     required this.onDelete,
   });
@@ -46,6 +48,7 @@ class CategoriesTab extends StatelessWidget {
                     return _CategoryCard(
                       category: c,
                       productCount: menu.productCountOf(c.id),
+                      onView: () => onView(c),
                       onEdit: () => onEdit(c),
                       onDelete: () => onDelete(c),
                     );
@@ -78,12 +81,14 @@ class CategoriesTab extends StatelessWidget {
 class _CategoryCard extends StatelessWidget {
   final Category category;
   final int productCount;
+  final VoidCallback onView;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _CategoryCard({
     required this.category,
     required this.productCount,
+    required this.onView,
     required this.onEdit,
     required this.onDelete,
   });
@@ -138,13 +143,27 @@ class _CategoryCard extends StatelessWidget {
             ),
           ),
           IconButton(
+            onPressed: onView,
+            tooltip: 'Voir',
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.visibility_outlined, size: 20),
+          ),
+          IconButton(
             onPressed: onEdit,
             tooltip: 'Modifier',
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            padding: EdgeInsets.zero,
             icon: const Icon(Icons.edit_outlined, size: 20),
           ),
           IconButton(
             onPressed: onDelete,
             tooltip: 'Supprimer',
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            padding: EdgeInsets.zero,
             icon: const Icon(
               Icons.delete_outline_rounded,
               size: 20,

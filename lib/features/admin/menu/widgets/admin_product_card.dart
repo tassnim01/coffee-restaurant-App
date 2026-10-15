@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/product_image.dart';
 import '../models/product.dart';
 
 /// One product row: image, name, category chip, price,
-/// availability switch, edit and delete actions.
+/// availability switch, and detail/edit/delete actions.
 class AdminProductCard extends StatelessWidget {
   final Product product;
   final String categoryName;
   final ValueChanged<bool> onAvailabilityChanged;
+  final VoidCallback onView;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -18,6 +20,7 @@ class AdminProductCard extends StatelessWidget {
     required this.product,
     required this.categoryName,
     required this.onAvailabilityChanged,
+    required this.onView,
     required this.onEdit,
     required this.onDelete,
   });
@@ -61,8 +64,10 @@ class AdminProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 5),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.chipBackground,
                       borderRadius: BorderRadius.circular(8),
@@ -93,12 +98,19 @@ class AdminProductCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _ActionIcon(
+                    icon: Icons.visibility_outlined,
+                    color: AppColors.black,
+                    tooltip: 'Voir',
+                    onTap: onView,
+                  ),
+                  const SizedBox(width: 4),
+                  _ActionIcon(
                     icon: Icons.edit_outlined,
                     color: AppColors.black,
                     tooltip: 'Modifier',
                     onTap: onEdit,
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 4),
                   _ActionIcon(
                     icon: Icons.delete_outline_rounded,
                     color: AppColors.burgundy,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../client/screens/clients_screen.dart';
+import '../gestion_client/screens/clients_screen.dart';
 import '../menu/screens/menu_management_screen.dart';
 import '../orders/screens/orders_screen.dart';
 import 'admin_drawer.dart';

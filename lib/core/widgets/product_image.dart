@@ -1,5 +1,7 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
 
 /// Affiche une image depuis une URL http, un asset ou une data URL base64.
@@ -41,7 +43,7 @@ class ProductImage extends StatelessWidget {
           base64Decode(url.split(',').last),
           fit: BoxFit.cover,
           gaplessPlayback: true,
-          errorBuilder: (_, __, ___) => _placeholder(),
+          errorBuilder: (_, _, _) => _placeholder(),
         );
       } catch (_) {
         return _placeholder();
@@ -54,14 +56,14 @@ class ProductImage extends StatelessWidget {
         fit: BoxFit.cover,
         loadingBuilder: (context, child, progress) =>
             progress == null ? child : _placeholder(loading: true),
-        errorBuilder: (_, __, ___) => _placeholder(),
+        errorBuilder: (_, _, _) => _placeholder(),
       );
     }
 
     return Image.asset(
       url,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => _placeholder(),
+      errorBuilder: (_, _, _) => _placeholder(),
     );
   }
 

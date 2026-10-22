@@ -247,7 +247,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
               : ListView.separated(
                   padding: const EdgeInsets.only(bottom: 24),
                   itemCount: products.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final product = products[index];
                     return AdminProductCard(

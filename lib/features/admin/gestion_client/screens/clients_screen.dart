@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/confirm_dialog.dart';
@@ -89,10 +90,14 @@ class _ClientsScreenState extends State<ClientsScreen> {
                   height: 54,
                   child: FilledButton.icon(
                     onPressed: () => _openForm(),
-                    icon: const Icon(Icons.person_add_alt_1_rounded,
-                        color: Colors.white),
-                    label: Text('Ajouter un client',
-                        style: AppTextStyles.button),
+                    icon: const Icon(
+                      Icons.person_add_alt_1_rounded,
+                      color: Colors.white,
+                    ),
+                    label: Text(
+                      'Ajouter un client',
+                      style: AppTextStyles.button,
+                    ),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.forestGreen,
                       shape: RoundedRectangleBorder(
@@ -148,7 +153,8 @@ class _ClientsScreenState extends State<ClientsScreen> {
             FilledButton(
               onPressed: provider.retry,
               style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.forestGreen),
+                backgroundColor: AppColors.forestGreen,
+              ),
               child: Text('Réessayer', style: AppTextStyles.button),
             ),
           ],
@@ -163,11 +169,16 @@ class _ClientsScreenState extends State<ClientsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.people_outline_rounded,
-                size: 46, color: AppColors.gray),
+            const Icon(
+              Icons.people_outline_rounded,
+              size: 46,
+              color: AppColors.gray,
+            ),
             const SizedBox(height: 10),
-            Text('Aucun client trouvé',
-                style: AppTextStyles.body.copyWith(color: AppColors.gray)),
+            Text(
+              'Aucun client trouvé',
+              style: AppTextStyles.body.copyWith(color: AppColors.gray),
+            ),
           ],
         ),
       );
@@ -176,7 +187,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
     return ListView.separated(
       padding: const EdgeInsets.only(bottom: 12),
       itemCount: clients.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, i) {
         final client = clients[i];
         return ClientCard(

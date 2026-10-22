@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../menu/widgets/menu_search_field.dart';
@@ -67,8 +68,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ),
         const SizedBox(width: 4),
         Expanded(
-          child: Text('Gestion des commandes',
-              style: AppTextStyles.screenTitle),
+          child: Text(
+            'Gestion des commandes',
+            style: AppTextStyles.screenTitle,
+          ),
         ),
       ],
     );
@@ -91,7 +94,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
             FilledButton(
               onPressed: provider.retry,
               style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.forestGreen),
+                backgroundColor: AppColors.forestGreen,
+              ),
               child: Text('Réessayer', style: AppTextStyles.button),
             ),
           ],
@@ -106,11 +110,16 @@ class _OrdersScreenState extends State<OrdersScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.receipt_long_outlined,
-                size: 46, color: AppColors.gray),
+            const Icon(
+              Icons.receipt_long_outlined,
+              size: 46,
+              color: AppColors.gray,
+            ),
             const SizedBox(height: 10),
-            Text('Aucune commande',
-                style: AppTextStyles.body.copyWith(color: AppColors.gray)),
+            Text(
+              'Aucune commande',
+              style: AppTextStyles.body.copyWith(color: AppColors.gray),
+            ),
           ],
         ),
       );
@@ -119,7 +128,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return ListView.separated(
       padding: const EdgeInsets.only(bottom: 24),
       itemCount: orders.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, i) {
         final order = orders[i];
         return OrderCard(

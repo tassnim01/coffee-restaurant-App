@@ -1,10 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'core/theme/app_theme.dart';
-import 'features/admin/client/data/client_repository.dart';
-import 'features/admin/client/data/firebase_client_repository.dart';
-import 'features/admin/client/providers/client_provider.dart';
+import 'features/admin/gestion_client/data/client_repository.dart';
+import 'features/admin/gestion_client/data/firebase_client_repository.dart';
+import 'features/admin/gestion_client/providers/client_provider.dart';
 import 'features/admin/menu/data/firebase_menu_repository.dart';
 import 'features/admin/menu/data/menu_repository.dart';
 import 'features/admin/menu/providers/menu_provider.dart';
@@ -13,13 +14,15 @@ import 'features/admin/orders/data/order_repository.dart';
 import 'features/admin/orders/providers/orders_provider.dart';
 import 'features/admin/shell/admin_shell.dart';
 import 'firebase_options.dart';
+import 'features/client/welcome/welcome_screen.dart';
+
+/// Temporaire : true = espace client, false = espace responsable.
+const bool kStartAsClient = true;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   final menuRepository = FirebaseMenuRepository();
   await menuRepository.seedIfEmpty();
@@ -66,10 +69,10 @@ class CoffeeShopApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Coffee Shop Admin',
+        title: 'Coffee Shop',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
-        home: const AdminShell(),
+        home: kStartAsClient ? const WelcomeScreen() : const AdminShell(),
       ),
     );
   }

@@ -1,11 +1,14 @@
+import 'supplement.dart';
+
 class Product {
   final String id;
   final String name;
   final String categoryId;
   final String description;
-  final double price; // in Tunisian Dinar (DT)
-  final String? imageUrl; // network URL, asset path, or null
+  final double price; // en Dinar tunisien (DT)
+  final String? imageUrl; // URL réseau, asset, data URL ou null
   final bool isAvailable;
+  final List<Supplement> supplements;
 
   const Product({
     required this.id,
@@ -15,6 +18,7 @@ class Product {
     required this.price,
     this.imageUrl,
     this.isAvailable = true,
+    this.supplements = const [],
   });
 
   Product copyWith({
@@ -25,6 +29,7 @@ class Product {
     double? price,
     String? imageUrl,
     bool? isAvailable,
+    List<Supplement>? supplements,
   }) =>
       Product(
         id: id ?? this.id,
@@ -34,9 +39,10 @@ class Product {
         price: price ?? this.price,
         imageUrl: imageUrl ?? this.imageUrl,
         isAvailable: isAvailable ?? this.isAvailable,
+        supplements: supplements ?? this.supplements,
       );
 
-  /// Firestore-ready serialization (the id is the document id).
+  /// Sérialisation Firestore (l'id est l'identifiant du document).
   Map<String, dynamic> toMap() => {
         'name': name,
         'categoryId': categoryId,
@@ -44,6 +50,7 @@ class Product {
         'price': price,
         'imageUrl': imageUrl,
         'isAvailable': isAvailable,
+        'supplements': supplements.map((s) => s.toMap()).toList(),
       };
 
   factory Product.fromMap(String id, Map<String, dynamic> map) => Product(
@@ -54,5 +61,8 @@ class Product {
         price: (map['price'] as num?)?.toDouble() ?? 0,
         imageUrl: map['imageUrl'] as String?,
         isAvailable: map['isAvailable'] as bool? ?? true,
+        supplements: (map['supplements'] as List<dynamic>? ?? [])
+            .map((e) => Supplement.fromMap(Map<String, dynamic>.from(e as Map)))
+            .toList(),
       );
 }

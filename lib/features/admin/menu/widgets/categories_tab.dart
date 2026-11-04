@@ -9,14 +9,12 @@ import '../providers/menu_provider.dart';
 
 /// Onglet "Catégories" : liste, modification, suppression, ajout.
 class CategoriesTab extends StatelessWidget {
-  final VoidCallback onAdd;
   final ValueChanged<Category> onView;
   final ValueChanged<Category> onEdit;
   final ValueChanged<Category> onDelete;
 
   const CategoriesTab({
     super.key,
-    required this.onAdd,
     required this.onView,
     required this.onEdit,
     required this.onDelete,
@@ -55,24 +53,6 @@ class CategoriesTab extends StatelessWidget {
                     );
                   },
                 ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 8, bottom: 16),
-          child: SizedBox(
-            width: double.infinity,
-            height: 54,
-            child: FilledButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add_rounded, color: Colors.white),
-              label: Text('Ajouter une catégorie', style: AppTextStyles.button),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.forestGreen,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-            ),
-          ),
         ),
       ],
     );

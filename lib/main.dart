@@ -14,7 +14,10 @@ import 'features/admin/orders/data/order_repository.dart';
 import 'features/admin/orders/providers/orders_provider.dart';
 import 'features/admin/shell/admin_shell.dart';
 import 'firebase_options.dart';
+import 'features/client/cart/providers/cart_provider.dart';
 import 'features/client/welcome/welcome_screen.dart';
+import 'features/admin/settings/data/firebase_settings_repository.dart';
+import 'features/admin/settings/providers/settings_provider.dart';
 
 /// Temporaire : true = espace client, false = espace responsable.
 const bool kStartAsClient = true;
@@ -66,6 +69,12 @@ class CoffeeShopApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<ClientsProvider>(
           create: (_) => ClientsProvider(clientRepository),
+        ),
+        ChangeNotifierProvider<CartProvider>(
+          create: (_) => CartProvider(),
+        ),
+         ChangeNotifierProvider<SettingsProvider>(
+          create: (_) => SettingsProvider(FirebaseSettingsRepository()),
         ),
       ],
       child: MaterialApp(

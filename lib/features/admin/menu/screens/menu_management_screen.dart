@@ -151,7 +151,6 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                 child: _tabIndex == 0
                     ? _buildProductsTab()
                     : CategoriesTab(
-                        onAdd: _openCategoryForm,
                         onView: _showCategoryDetails,
                         onEdit: _openCategoryForm,
                         onDelete: _confirmDeleteCategory,
@@ -261,24 +260,6 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     );
                   },
                 ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 8, bottom: 16),
-          child: SizedBox(
-            width: double.infinity,
-            height: 54,
-            child: FilledButton.icon(
-              onPressed: _openProductForm,
-              icon: const Icon(Icons.add_rounded, color: Colors.white),
-              label: Text('Ajouter un produit', style: AppTextStyles.button),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.forestGreen,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-            ),
-          ),
         ),
       ],
     );

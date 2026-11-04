@@ -8,6 +8,8 @@ import '../../../admin/menu/providers/menu_provider.dart';
 import '../../../admin/menu/widgets/menu_search_field.dart';
 import '../widgets/client_category_tabs.dart';
 import '../widgets/client_product_tile.dart';
+import '../../cart/providers/cart_provider.dart';
+import 'product_detail_screen.dart';
 
 class ClientMenuScreen extends StatefulWidget {
   /// Catégorie sélectionnée (null = Tous), partagée avec l'accueil.
@@ -170,11 +172,26 @@ class _ClientMenuScreenState extends State<ClientMenuScreen> {
         separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, i) {
           final product = products[i];
-          return ClientProductTile(
+                    return ClientProductTile(
             product: product,
-            onTap: () =>
-                _showInfo('Le détail de « ${product.name} » arrive bientôt.'),
-            onAdd: () => _showInfo("Le panier arrive à l'étape suivante."),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product: product),
+              ),
+            ),
+            onAdd: () {
+              // Un plat avec suppléments ouvre sa fiche pour les choisir.
+              if (product.supplements.isNotEmpty) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ProductDetailScreen(product: product),
+                  ),
+                );
+              } else {
+                context.read<CartProvider>().add(product);
+                _showInfo('« ${product.name} » ajouté au panier.');
+              }
+            },
           );
         },
       ),

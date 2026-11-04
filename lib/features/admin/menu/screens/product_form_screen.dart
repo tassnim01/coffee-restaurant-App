@@ -9,6 +9,8 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/product_image.dart';
 import '../models/product.dart';
 import '../providers/menu_provider.dart';
+import '../models/supplement.dart';
+import '../widgets/supplements_editor.dart';
 
 class ProductFormScreen extends StatefulWidget {
   /// null = ajout, non null = modification.
@@ -29,6 +31,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   String? _categoryId;
   String? _imageUrl;
   bool _isAvailable = true;
+  List<Supplement> _supplements = [];
   bool _saving = false;
 
   bool get _isEdit => widget.product != null;
@@ -45,6 +48,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _categoryId = p?.categoryId;
     _imageUrl = p?.imageUrl;
     _isAvailable = p?.isAvailable ?? true;
+    _supplements = List.of(p?.supplements ?? const []);
   }
 
   @override
@@ -103,6 +107,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
             price: price,
             imageUrl: _imageUrl,
             isAvailable: _isAvailable,
+            supplements: _supplements,
           ),
         );
       } else {
@@ -115,6 +120,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
             price: price,
             imageUrl: _imageUrl,
             isAvailable: _isAvailable,
+            supplements: _supplements,
           ),
         );
       }
@@ -224,6 +230,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           }
                           return null;
                         },
+                      ),
+                      const SizedBox(height: 16),
+                      SupplementsEditor(
+                        initial: _supplements,
+                        onChanged: (list) => _supplements = list,
                       ),
                       const SizedBox(height: 16),
                       _buildAvailabilityRow(),

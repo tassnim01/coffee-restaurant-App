@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../cart/providers/cart_provider.dart';
+import '../cart/screens/cart_screen.dart';
 import '../home/screens/home_screen.dart';
 import '../menu/screens/client_menu_screen.dart';
 import 'client_bottom_nav.dart';
@@ -30,20 +33,25 @@ class _ClientShellState extends State<ClientShell> {
 
   @override
   Widget build(BuildContext context) {
+    final cartCount = context.watch<CartProvider>().itemCount;
+
     return Scaffold(
       body: IndexedStack(
         index: _index,
         children: [
           HomeScreen(onOpenMenu: _openMenu),
           ClientMenuScreen(categoryFilter: _menuCategory),
-          const ClientPlaceholderScreen(
-              title: 'Panier', icon: Icons.shopping_bag_outlined),
+          CartScreen(
+            onBack: () => setState(() => _index = 1),
+            onSeeMenu: () => _openMenu(null),
+          ),
           const ClientPlaceholderScreen(
               title: 'Compte', icon: Icons.person_outline_rounded),
         ],
       ),
       bottomNavigationBar: ClientBottomNav(
         currentIndex: _index,
+        cartCount: cartCount,
         onTap: (i) {
           // Toucher l'onglet Menu directement = toutes les catégories.
           if (i == 1 && _index != 1) _menuCategory.value = null;

@@ -4,6 +4,7 @@ import '../menu/screens/menu_management_screen.dart';
 import '../orders/screens/orders_screen.dart';
 import 'admin_drawer.dart';
 import 'coming_soon_scree.dart';
+import '../settings/screens/settings_screen.dart';
 
 /// Conteneur de l'espace responsable : menu latéral + pages.
 class AdminShell extends StatefulWidget {
@@ -56,7 +57,7 @@ class _AdminShellState extends State<AdminShell> {
           MenuManagementScreen(onMenuTap: _openDrawer),
           ClientsScreen(onMenuTap: _openDrawer),
           ComingSoonScreen(title: 'Paiements', onMenuTap: _openDrawer),
-          ComingSoonScreen(title: 'Paramètres', onMenuTap: _openDrawer),
+          SettingsScreen(onMenuTap: _openDrawer),
         ],
       ),
     );

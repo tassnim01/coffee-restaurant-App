@@ -1,7 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'features/auth/data/firebase_auth_repository.dart';
+import 'features/auth/providers/auth_provider.dart';
+import 'features/client/orders/data/firebase_client_order_repository.dart';
+import 'features/client/orders/providers/client_orders_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'features/admin/gestion_client/data/client_repository.dart';
 import 'features/admin/gestion_client/data/firebase_client_repository.dart';
@@ -75,6 +78,13 @@ class CoffeeShopApp extends StatelessWidget {
         ),
          ChangeNotifierProvider<SettingsProvider>(
           create: (_) => SettingsProvider(FirebaseSettingsRepository()),
+        ),
+                ChangeNotifierProvider<AuthProvider>(
+          create: (_) => AuthProvider(FirebaseAuthRepository()),
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, ClientOrdersProvider>(
+          create: (_) => ClientOrdersProvider(FirebaseClientOrderRepository()),
+          update: (_, auth, orders) => orders!..setUser(auth.user?.uid),
         ),
       ],
       child: MaterialApp(

@@ -77,7 +77,7 @@ class FirebaseOrderRepository implements OrderRepository {
         number: 1046,
         name: 'Nour Ben Salah',
         phone: '+216 50 112 233',
-        status: OrderStatus.received,
+        status: OrderStatus.pending,
         minutesAgo: 2,
         items: [_item('p3', 2)],
       ),

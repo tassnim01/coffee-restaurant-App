@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../cart/providers/cart_provider.dart';
 import '../cart/screens/cart_screen.dart';
 import '../home/screens/home_screen.dart';
 import '../menu/screens/client_menu_screen.dart';
 import 'client_bottom_nav.dart';
-import 'client_placeholder_screen.dart';
+import '../account/account_screen.dart';
 
 /// Conteneur de l'espace client : pages + barre de navigation du bas.
 class ClientShell extends StatefulWidget {
@@ -45,8 +46,7 @@ class _ClientShellState extends State<ClientShell> {
             onBack: () => setState(() => _index = 1),
             onSeeMenu: () => _openMenu(null),
           ),
-          const ClientPlaceholderScreen(
-              title: 'Compte', icon: Icons.person_outline_rounded),
+          const AccountScreen(),
         ],
       ),
       bottomNavigationBar: ClientBottomNav(

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../models/order_status.dart';
 
-/// Onglets : Toutes | En cours | Prêtes | Livrées.
+/// Onglets : Toutes | En attente | Reçues | En cours | Prêtes | Livrées.
 class OrderTabsBar extends StatelessWidget {
   final OrderTab selected;
   final ValueChanged<OrderTab> onChanged;
@@ -16,11 +17,12 @@ class OrderTabsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: OrderTab.values.map((tab) {
-        final isSelected = tab == selected;
-        return Expanded(
-          child: Padding(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: OrderTab.values.map((tab) {
+          final isSelected = tab == selected;
+          return Padding(
             padding: EdgeInsets.only(
               right: tab == OrderTab.values.last ? 0 : 8,
             ),
@@ -29,10 +31,10 @@ class OrderTabsBar extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 height: 38,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color:
-                      isSelected ? AppColors.forestGreen : AppColors.surface,
+                  color: isSelected ? AppColors.forestGreen : AppColors.surface,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected
@@ -49,9 +51,9 @@ class OrderTabsBar extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
   }
 }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/formatters.dart';
-import '../../../../core/widgets/product_image.dart';
 import '../models/restaurant_order.dart';
 import 'order_status_chip.dart';
+import 'product_thumb.dart';
 
 class OrderCard extends StatelessWidget {
   final RestaurantOrder order;
@@ -36,7 +37,13 @@ class OrderCard extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             child: Row(
               children: [
-                ProductImage(imageUrl: order.coverImage, size: 60, radius: 14),
+                ProductThumb(
+                  productId: order.items.isEmpty
+                      ? null
+                      : order.items.first.productId,
+                  imageUrl: order.coverImage,
+                  size: 60,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -48,14 +55,18 @@ class OrderCard extends StatelessWidget {
                         'Client : ${order.clientName}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.chip
-                            .copyWith(color: AppColors.gray, fontSize: 12),
+                        style: AppTextStyles.chip.copyWith(
+                          color: AppColors.gray,
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         Formatters.time(order.createdAt),
-                        style: AppTextStyles.chip
-                            .copyWith(color: AppColors.gray, fontSize: 12),
+                        style: AppTextStyles.chip.copyWith(
+                          color: AppColors.gray,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -68,8 +79,7 @@ class OrderCard extends StatelessWidget {
                     const SizedBox(height: 14),
                     Text(
                       Formatters.dt(order.total),
-                      style:
-                          AppTextStyles.productName.copyWith(fontSize: 14),
+                      style: AppTextStyles.productName.copyWith(fontSize: 14),
                     ),
                   ],
                 ),

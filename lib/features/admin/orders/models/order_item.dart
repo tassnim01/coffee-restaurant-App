@@ -1,9 +1,12 @@
+import '../../menu/models/supplement.dart';
+
 class OrderItem {
   final String productId;
   final String name;
   final int quantity;
-  final double unitPrice; // en DT
+  final double unitPrice; // prix de base, sans suppléments
   final String? imageUrl;
+  final List<Supplement> supplements;
 
   const OrderItem({
     required this.productId,
@@ -11,9 +14,13 @@ class OrderItem {
     required this.quantity,
     required this.unitPrice,
     this.imageUrl,
+    this.supplements = const [],
   });
 
-  double get lineTotal => quantity * unitPrice;
+  double get supplementsTotal =>
+      supplements.fold(0.0, (sum, s) => sum + s.price);
+
+  double get lineTotal => quantity * (unitPrice + supplementsTotal);
 
   Map<String, dynamic> toMap() => {
         'productId': productId,
@@ -21,6 +28,7 @@ class OrderItem {
         'quantity': quantity,
         'unitPrice': unitPrice,
         'imageUrl': imageUrl,
+        'supplements': supplements.map((s) => s.toMap()).toList(),
       };
 
   factory OrderItem.fromMap(Map<String, dynamic> map) => OrderItem(
@@ -29,5 +37,8 @@ class OrderItem {
         quantity: (map['quantity'] as num?)?.toInt() ?? 1,
         unitPrice: (map['unitPrice'] as num?)?.toDouble() ?? 0,
         imageUrl: map['imageUrl'] as String?,
+        supplements: (map['supplements'] as List<dynamic>? ?? [])
+            .map((e) => Supplement.fromMap(Map<String, dynamic>.from(e as Map)))
+            .toList(),
       );
 }

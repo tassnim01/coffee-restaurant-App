@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-enum OrderStatus { received, preparing, ready, delivered }
+enum OrderStatus { pending, received, preparing, ready, delivered }
 
 OrderStatus orderStatusFromKey(String? key) => OrderStatus.values.firstWhere(
   (s) => s.name == key,
@@ -12,6 +12,8 @@ OrderStatus orderStatusFromKey(String? key) => OrderStatus.values.firstWhere(
 extension OrderStatusX on OrderStatus {
   String get label {
     switch (this) {
+      case OrderStatus.pending:
+        return 'En attente';
       case OrderStatus.received:
         return 'Reçue';
       case OrderStatus.preparing:
@@ -25,6 +27,8 @@ extension OrderStatusX on OrderStatus {
 
   OrderStatus? get next {
     switch (this) {
+      case OrderStatus.pending:
+        return OrderStatus.received;
       case OrderStatus.received:
         return OrderStatus.preparing;
       case OrderStatus.preparing:
@@ -38,6 +42,8 @@ extension OrderStatusX on OrderStatus {
 
   String? get actionLabel {
     switch (this) {
+      case OrderStatus.pending:
+        return 'Accepter la commande';
       case OrderStatus.received:
         return 'Démarrer la préparation';
       case OrderStatus.preparing:
@@ -51,6 +57,8 @@ extension OrderStatusX on OrderStatus {
 
   String get trackingTitle {
     switch (this) {
+      case OrderStatus.pending:
+        return 'Votre commande est en attente';
       case OrderStatus.received:
         return 'Votre commande a bien été reçue';
       case OrderStatus.preparing:
@@ -64,6 +72,8 @@ extension OrderStatusX on OrderStatus {
 
   String get trackingSubtitle {
     switch (this) {
+      case OrderStatus.pending:
+        return 'Le restaurant va bientôt la confirmer.';
       case OrderStatus.received:
         return 'Elle sera prise en charge très vite.';
       case OrderStatus.preparing:
@@ -77,6 +87,8 @@ extension OrderStatusX on OrderStatus {
 
   IconData get trackingIcon {
     switch (this) {
+      case OrderStatus.pending:
+        return Icons.hourglass_top_rounded;
       case OrderStatus.received:
         return Icons.receipt_long_outlined;
       case OrderStatus.preparing:
@@ -90,6 +102,8 @@ extension OrderStatusX on OrderStatus {
 
   Color get background {
     switch (this) {
+      case OrderStatus.pending:
+        return AppColors.warmBeige.withValues(alpha: 0.75);
       case OrderStatus.received:
         return AppColors.burgundy.withValues(alpha: 0.12);
       case OrderStatus.preparing:
@@ -103,6 +117,8 @@ extension OrderStatusX on OrderStatus {
 
   Color get foreground {
     switch (this) {
+      case OrderStatus.pending:
+        return AppColors.textPrimary;
       case OrderStatus.received:
         return AppColors.burgundy;
       case OrderStatus.preparing:
@@ -116,13 +132,15 @@ extension OrderStatusX on OrderStatus {
 }
 
 /// Onglets de l'écran "Gestion des commandes".
-enum OrderTab { all, received, inProgress, ready, delivered }
+enum OrderTab { all, pending, received, inProgress, ready, delivered }
 
 extension OrderTabX on OrderTab {
   String get label {
     switch (this) {
       case OrderTab.all:
         return 'Toutes';
+      case OrderTab.pending:
+        return 'En attente';
       case OrderTab.received:
         return 'Reçues';
       case OrderTab.inProgress:
@@ -138,6 +156,8 @@ extension OrderTabX on OrderTab {
     switch (this) {
       case OrderTab.all:
         return true;
+      case OrderTab.pending:
+        return status == OrderStatus.pending;
       case OrderTab.received:
         return status == OrderStatus.received;
       case OrderTab.inProgress:

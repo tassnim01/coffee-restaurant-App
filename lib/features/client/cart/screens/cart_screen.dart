@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../../../auth/providers/auth_provider.dart';
+import '../../../auth/widgets/auth_sheet.dart';
+import '../../orders/providers/client_orders_provider.dart';
+import '../../orders/screens/my_orders_screen.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/money.dart';
@@ -29,16 +33,51 @@ class CartScreen extends StatelessWidget {
     if (confirmed) cart.clear();
   }
 
-  void _validate(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text(
-            "La validation de la commande (inscription, PDF) arrive à l'étape suivante.",
-          ),
-        ),
+  Future<void> _validate(BuildContext context, double vatPercent) async {
+    final auth = context.read<AuthProvider>();
+    final cart = context.read<CartProvider>();
+    final orders = context.read<ClientOrdersProvider>();
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    // 1. Fenêtre d'inscription si le client n'est pas encore identifié.
+    if (!auth.isLoggedIn) {
+      final ok = await showAuthSheet(context);
+      if (ok != true) return;
+    }
+    if (!context.mounted) return;
+
+    final user = auth.user;
+    if (user == null) return;
+
+    // 2. Enregistrement de la commande dans Firestore.
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+    try {
+      await orders.placeOrder(
+        user: user,
+        items: cart.items,
+        vatPercent: vatPercent,
       );
+      cart.clear();
+      if (!context.mounted) return;
+      navigator.pop(); // ferme le chargement
+      // 3. Affiche "Mes commandes".
+      navigator.push(MaterialPageRoute(builder: (_) => const MyOrdersScreen()));
+    } catch (_) {
+      if (!context.mounted) return;
+      navigator.pop();
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text("Impossible d'enregistrer la commande. Réessayez."),
+          ),
+        );
+    }
   }
 
   @override
@@ -216,7 +255,7 @@ class CartScreen extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: FilledButton(
-              onPressed: () => _validate(context),
+              onPressed: () => _validate(context, vatPercent),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.forestGreen,
                 shape: RoundedRectangleBorder(

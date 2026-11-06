@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/formatters.dart';
@@ -59,8 +60,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   ? Center(
                       child: Text(
                         'Commande introuvable',
-                        style: AppTextStyles.body
-                            .copyWith(color: AppColors.gray),
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.gray,
+                        ),
                       ),
                     )
                   : _buildContent(order),
@@ -81,8 +83,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             icon: const Icon(Icons.chevron_left_rounded, size: 28),
           ),
           Expanded(
-            child: Text('Détails de la commande',
-                style: AppTextStyles.screenTitle),
+            child: Text(
+              'Détails de la commande',
+              style: AppTextStyles.screenTitle,
+            ),
           ),
         ],
       ),
@@ -105,8 +109,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     Expanded(
                       child: Text(
                         order.code,
-                        style: AppTextStyles.screenTitle
-                            .copyWith(fontSize: 20),
+                        style: AppTextStyles.screenTitle.copyWith(fontSize: 20),
                       ),
                     ),
                     OrderStatusChip(status: order.status),
@@ -115,8 +118,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 const SizedBox(height: 4),
                 Text(
                   Formatters.dateTime(order.createdAt),
-                  style: AppTextStyles.chip
-                      .copyWith(color: AppColors.gray, fontSize: 12.5),
+                  style: AppTextStyles.chip.copyWith(
+                    color: AppColors.gray,
+                    fontSize: 12.5,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 Text('Client', style: AppTextStyles.productName),
@@ -134,11 +139,35 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 const SizedBox(height: 6),
                 const Divider(color: AppColors.border, height: 1),
                 const SizedBox(height: 14),
+                if (order.vatPercent > 0) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text('Sous-total', style: AppTextStyles.body),
+                      ),
+                      Text(
+                        Formatters.dt(order.subtotal),
+                        style: AppTextStyles.body,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'TVA (${order.vatPercent.toStringAsFixed(order.vatPercent == order.vatPercent.roundToDouble() ? 0 : 1)}%)',
+                          style: AppTextStyles.body,
+                        ),
+                      ),
+                      Text(Formatters.dt(order.vat), style: AppTextStyles.body),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
                 Row(
                   children: [
-                    Expanded(
-                      child: Text('Total', style: AppTextStyles.body),
-                    ),
+                    Expanded(child: Text('Total', style: AppTextStyles.body)),
                     Text(
                       Formatters.dt(order.total),
                       style: AppTextStyles.screenTitle,
@@ -161,7 +190,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     onPressed: _updating ? null : () => _advance(order),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(
-                          color: AppColors.forestGreen, width: 1.3),
+                        color: AppColors.forestGreen,
+                        width: 1.3,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -174,8 +205,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                           )
                         : Text(
                             actionLabel,
-                            style: AppTextStyles.toggle
-                                .copyWith(color: AppColors.forestGreen),
+                            style: AppTextStyles.toggle.copyWith(
+                              color: AppColors.forestGreen,
+                            ),
                           ),
                   ),
                 ),
@@ -187,8 +219,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 child: FilledButton(
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) =>
-                          OrderTrackingScreen(orderId: order.id),
+                      builder: (_) => OrderTrackingScreen(orderId: order.id),
                     ),
                   ),
                   style: FilledButton.styleFrom(
@@ -197,8 +228,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: Text('Suivi de la commande',
-                      style: AppTextStyles.button),
+                  child: Text(
+                    'Suivi de la commande',
+                    style: AppTextStyles.button,
+                  ),
                 ),
               ),
             ],
@@ -225,8 +258,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.border),
             ),
-            child: const Icon(Icons.person_outline_rounded,
-                color: AppColors.gray),
+            child: const Icon(
+              Icons.person_outline_rounded,
+              color: AppColors.gray,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -237,8 +272,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 const SizedBox(height: 3),
                 Text(
                   order.clientPhone,
-                  style: AppTextStyles.chip
-                      .copyWith(color: AppColors.gray, fontSize: 12.5),
+                  style: AppTextStyles.chip.copyWith(
+                    color: AppColors.gray,
+                    fontSize: 12.5,
+                  ),
                 ),
               ],
             ),
@@ -273,9 +310,19 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 const SizedBox(height: 3),
                 Text(
                   '${item.quantity} x ${Formatters.dt(item.unitPrice)}',
-                  style: AppTextStyles.chip
-                      .copyWith(color: AppColors.gray, fontSize: 12),
+                  style: AppTextStyles.chip.copyWith(
+                    color: AppColors.gray,
+                    fontSize: 12,
+                  ),
                 ),
+                if (item.supplements.isNotEmpty)
+                  Text(
+                    '+ ${item.supplements.map((s) => s.name).join(', ')}',
+                    style: AppTextStyles.chip.copyWith(
+                      color: AppColors.gray,
+                      fontSize: 11.5,
+                    ),
+                  ),
               ],
             ),
           ),

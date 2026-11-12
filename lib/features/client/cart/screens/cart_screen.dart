@@ -50,6 +50,15 @@ class CartScreen extends StatelessWidget {
     final user = auth.user;
     if (user == null) return;
 
+    if (user.tableNumber == null || user.tableNumber!.trim().isEmpty) {
+      final tableNumber = await showTableNumberDialog(context, name: user.name);
+      if (tableNumber == null || !context.mounted) return;
+      auth.setTableNumber(tableNumber);
+    }
+
+    final updatedUser = auth.user;
+    if (updatedUser == null || updatedUser.tableNumber == null) return;
+
     // 2. Enregistrement de la commande dans Firestore.
     showDialog<void>(
       context: context,
@@ -58,7 +67,7 @@ class CartScreen extends StatelessWidget {
     );
     try {
       await orders.placeOrder(
-        user: user,
+        user: updatedUser,
         items: cart.items,
         vatPercent: vatPercent,
       );

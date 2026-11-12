@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+
 import '../../../admin/orders/models/order_item.dart';
 import '../../../admin/orders/models/restaurant_order.dart';
 import '../../../auth/models/app_user.dart';
@@ -36,17 +38,19 @@ class ClientOrdersProvider extends ChangeNotifier {
     }
 
     _isLoading = true;
-    _subscription = _repository.watchOrdersOf(uid).listen(
-      (data) {
-        _orders = data;
-        _isLoading = false;
-        notifyListeners();
-      },
-      onError: (_) {
-        _isLoading = false;
-        notifyListeners();
-      },
-    );
+    _subscription = _repository
+        .watchOrdersOf(uid)
+        .listen(
+          (data) {
+            _orders = data;
+            _isLoading = false;
+            notifyListeners();
+          },
+          onError: (_) {
+            _isLoading = false;
+            notifyListeners();
+          },
+        );
   }
 
   RestaurantOrder? byId(String id) {
@@ -82,6 +86,7 @@ class ClientOrdersProvider extends ChangeNotifier {
       userId: user.uid,
       clientName: user.name,
       clientPhone: user.phone,
+      tableNumber: user.tableNumber ?? '',
       items: orderItems,
       vatPercent: vatPercent,
     );

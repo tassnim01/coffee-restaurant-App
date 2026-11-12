@@ -60,6 +60,17 @@ class OrderCard extends StatelessWidget {
                           fontSize: 12,
                         ),
                       ),
+                      if (order.tableNumber != null &&
+                          order.tableNumber!.isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          'Table : ${order.tableNumber}',
+                          style: AppTextStyles.chip.copyWith(
+                            color: AppColors.gray,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 3),
                       Text(
                         Formatters.time(order.createdAt),

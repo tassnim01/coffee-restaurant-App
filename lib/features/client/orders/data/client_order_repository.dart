@@ -10,6 +10,7 @@ abstract class ClientOrderRepository {
     required String userId,
     required String clientName,
     required String clientPhone,
+    required String tableNumber,
     required List<OrderItem> items,
     required double vatPercent,
   });

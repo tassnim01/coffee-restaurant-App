@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import '../models/app_user.dart';
 import 'auth_repository.dart';
 
@@ -10,8 +11,8 @@ class FirebaseAuthRepository implements AuthRepository {
   final FirebaseFirestore _db;
 
   FirebaseAuthRepository({FirebaseAuth? auth, FirebaseFirestore? firestore})
-      : _auth = auth ?? FirebaseAuth.instance,
-        _db = firestore ?? FirebaseFirestore.instance;
+    : _auth = auth ?? FirebaseAuth.instance,
+      _db = firestore ?? FirebaseFirestore.instance;
 
   AuthFailure _failure(FirebaseAuthException e) {
     switch (e.code) {
@@ -20,7 +21,9 @@ class FirebaseAuthRepository implements AuthRepository {
       case 'invalid-email':
         return const AuthFailure('Adresse e-mail invalide.');
       case 'weak-password':
-        return const AuthFailure('Mot de passe trop faible (6 caractères minimum).');
+        return const AuthFailure(
+          'Mot de passe trop faible (6 caractères minimum).',
+        );
       case 'user-not-found':
       case 'wrong-password':
       case 'invalid-credential':
@@ -31,7 +34,8 @@ class FirebaseAuthRepository implements AuthRepository {
         return const AuthFailure('Trop de tentatives. Réessayez plus tard.');
       case 'operation-not-allowed':
         return const AuthFailure(
-            "L'inscription par e-mail n'est pas activée dans Firebase.");
+          "L'inscription par e-mail n'est pas activée dans Firebase.",
+        );
       default:
         return const AuthFailure('Une erreur est survenue. Réessayez.');
     }
@@ -84,7 +88,10 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AppUser> login({required String email, required String password}) async {
+  Future<AppUser> login({
+    required String email,
+    required String password,
+  }) async {
     try {
       final cred = await _auth.signInWithEmailAndPassword(
         email: email.trim(),

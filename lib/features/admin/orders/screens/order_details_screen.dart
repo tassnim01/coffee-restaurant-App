@@ -277,6 +277,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     fontSize: 12.5,
                   ),
                 ),
+                if (order.tableNumber != null &&
+                    order.tableNumber!.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    'Table : ${order.tableNumber}',
+                    style: AppTextStyles.chip.copyWith(
+                      color: AppColors.forestGreen,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
@@ -12,8 +13,9 @@ import '../providers/auth_provider.dart';
 Future<bool?> showAuthSheet(
   BuildContext context, {
   bool startWithLogin = false,
-}) {
-  return showModalBottomSheet<bool>(
+}) async {
+  final auth = context.read<AuthProvider>();
+  final result = await showModalBottomSheet<_AuthResult>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -22,6 +24,88 @@ Future<bool?> showAuthSheet(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
     builder: (_) => _AuthSheet(startWithLogin: startWithLogin),
+  );
+  if (result == null) return null;
+
+  if (result == _AuthResult.registered && context.mounted) {
+    final user = auth.user;
+    if (user != null) {
+      final tableNumber = await showTableNumberDialog(context, name: user.name);
+      if (tableNumber != null && context.mounted) {
+        auth.setTableNumber(tableNumber);
+      }
+    }
+  }
+  return true;
+}
+
+enum _AuthResult { registered, loggedIn }
+
+Future<String?> showTableNumberDialog(
+  BuildContext context, {
+  required String name,
+}) => showDialog<String>(
+  context: context,
+  barrierDismissible: false,
+  builder: (_) => _TableNumberDialog(name: name),
+);
+
+class _TableNumberDialog extends StatefulWidget {
+  final String name;
+
+  const _TableNumberDialog({required this.name});
+
+  @override
+  State<_TableNumberDialog> createState() => _TableNumberDialogState();
+}
+
+class _TableNumberDialogState extends State<_TableNumberDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _tableNumber = TextEditingController();
+
+  @override
+  void dispose() {
+    _tableNumber.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => PopScope(
+    canPop: false,
+    child: AlertDialog(
+      title: Text('Bienvenue, ${widget.name}'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Veuillez saisir votre numéro de table.'),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _tableNumber,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: appInputDecoration(hint: 'Ex. 12'),
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? 'Le numéro de table est obligatoire'
+                  : null,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        FilledButton(
+          onPressed: () {
+            if (!_formKey.currentState!.validate()) return;
+            Navigator.of(context).pop(_tableNumber.text.trim());
+          },
+          style: FilledButton.styleFrom(backgroundColor: AppColors.forestGreen),
+          child: const Text('Confirmer'),
+        ),
+      ],
+    ),
   );
 }
 
@@ -69,7 +153,10 @@ class _AuthSheetState extends State<_AuthSheet> {
             email: _email.text,
             password: _password.text,
           );
-    if (ok && mounted) Navigator.of(context).pop(true);
+    if (ok && mounted) {
+      Navigator.of(context)
+          .pop(_login ? _AuthResult.loggedIn : _AuthResult.registered);
+    }
   }
 
   void _toggleMode() {
@@ -146,9 +233,7 @@ class _AuthSheetState extends State<_AuthSheet> {
               ),
               const SizedBox(height: 6),
               Text(
-                _login
-                    ? 'Connectez-vous pour valider votre commande.'
-                    : 'Pour valider votre commande, le restaurant a besoin de savoir qui vous êtes.',
+                _login ? 'Connectez-vous pour valider votre commande.' : 'Pour valider votre commande, le restaurant a besoin de savoir qui vous êtes.',
                 style: AppTextStyles.body.copyWith(color: AppColors.gray),
               ),
               const SizedBox(height: 18),
@@ -170,9 +255,10 @@ class _AuthSheetState extends State<_AuthSheet> {
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ]')),
                   ],
                   validator: (v) =>
-                      RegExp(r'^\d{8}$').hasMatch(Formatters.normalizePhone(v ?? ''))
-                          ? null
-                          : 'Numéro invalide (8 chiffres)',
+                      RegExp(r'^\d{8}$')
+                          .hasMatch(Formatters.normalizePhone(v ?? ''))
+                      ? null
+                      : 'Numéro invalide (8 chiffres)',
                 ),
               ],
               _field(
@@ -181,26 +267,28 @@ class _AuthSheetState extends State<_AuthSheet> {
                 hint: 'exemple@mail.com',
                 keyboardType: TextInputType.emailAddress,
                 validator: (v) =>
-                    RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch((v ?? '').trim())
-                        ? null
-                        : 'Adresse e-mail invalide',
+                    RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                        .hasMatch((v ?? '').trim())
+                    ? null
+                    : 'Adresse e-mail invalide',
               ),
               _field(
                 'Mot de passe',
                 _password,
                 hint: '6 caractères minimum',
                 password: true,
-                validator: (v) => (v == null || v.length < 6)
-                    ? '6 caractères minimum'
-                    : null,
+                validator: (v) =>
+                    (v == null || v.length < 6) ? '6 caractères minimum' : null,
               ),
               if (auth.error != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
                     auth.error!,
-                    style: AppTextStyles.chip
-                        .copyWith(color: AppColors.burgundy, fontSize: 12.5),
+                    style: AppTextStyles.chip.copyWith(
+                      color: AppColors.burgundy,
+                      fontSize: 12.5,
+                    ),
                   ),
                 ),
               SizedBox(

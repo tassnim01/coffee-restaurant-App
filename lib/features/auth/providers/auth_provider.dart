@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+
 import '../data/auth_repository.dart';
 import '../models/app_user.dart';
 
@@ -45,16 +47,25 @@ class AuthProvider extends ChangeNotifier {
     required String email,
     required String password,
   }) {
-    return _run(() => _repository.register(
-          name: name,
-          phone: phone,
-          email: email,
-          password: password,
-        ));
+    return _run(
+      () => _repository.register(
+        name: name,
+        phone: phone,
+        email: email,
+        password: password,
+      ),
+    );
   }
 
   Future<bool> login({required String email, required String password}) {
     return _run(() => _repository.login(email: email, password: password));
+  }
+
+  void setTableNumber(String tableNumber) {
+    final user = _user;
+    if (user == null) return;
+    _user = user.copyWith(tableNumber: tableNumber);
+    notifyListeners();
   }
 
   Future<bool> _run(Future<AppUser> Function() action) async {

@@ -7,6 +7,7 @@ class RestaurantOrder {
   final String? userId; // compte du client (null pour les commandes de démo)
   final String clientName;
   final String clientPhone;
+  final String? tableNumber;
   final List<OrderItem> items;
   final OrderStatus status;
   final DateTime createdAt;
@@ -18,6 +19,7 @@ class RestaurantOrder {
     this.userId,
     required this.clientName,
     required this.clientPhone,
+    this.tableNumber,
     required this.items,
     required this.status,
     required this.createdAt,
@@ -33,34 +35,35 @@ class RestaurantOrder {
   String? get coverImage => items.isEmpty ? null : items.first.imageUrl;
 
   Map<String, dynamic> toMap() => {
-        'number': number,
-        'userId': userId,
-        'clientName': clientName,
-        'clientPhone': clientPhone,
-        'items': items.map((i) => i.toMap()).toList(),
-        'status': status.name,
-        'subtotal': subtotal,
-        'vatPercent': vatPercent,
-        'vat': vat,
-        'total': total,
-      };
+    'number': number,
+    'userId': userId,
+    'clientName': clientName,
+    'clientPhone': clientPhone,
+    'tableNumber': tableNumber,
+    'items': items.map((i) => i.toMap()).toList(),
+    'status': status.name,
+    'subtotal': subtotal,
+    'vatPercent': vatPercent,
+    'vat': vat,
+    'total': total,
+  };
 
   factory RestaurantOrder.fromMap(
     String id,
     Map<String, dynamic> map, {
     required DateTime createdAt,
-  }) =>
-      RestaurantOrder(
-        id: id,
-        number: (map['number'] as num?)?.toInt() ?? 0,
-        userId: map['userId'] as String?,
-        clientName: map['clientName'] as String? ?? '',
-        clientPhone: map['clientPhone'] as String? ?? '',
-        items: (map['items'] as List<dynamic>? ?? [])
-            .map((e) => OrderItem.fromMap(Map<String, dynamic>.from(e as Map)))
-            .toList(),
-        status: orderStatusFromKey(map['status'] as String?),
-        createdAt: createdAt,
-        vatPercent: (map['vatPercent'] as num?)?.toDouble() ?? 0,
-      );
+  }) => RestaurantOrder(
+    id: id,
+    number: (map['number'] as num?)?.toInt() ?? 0,
+    userId: map['userId'] as String?,
+    clientName: map['clientName'] as String? ?? '',
+    clientPhone: map['clientPhone'] as String? ?? '',
+    tableNumber: map['tableNumber'] as String?,
+    items: (map['items'] as List<dynamic>? ?? [])
+        .map((e) => OrderItem.fromMap(Map<String, dynamic>.from(e as Map)))
+        .toList(),
+    status: orderStatusFromKey(map['status'] as String?),
+    createdAt: createdAt,
+    vatPercent: (map['vatPercent'] as num?)?.toDouble() ?? 0,
+  );
 }

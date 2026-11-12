@@ -27,7 +27,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
     OrderTab.ready,
     OrderTab.delivered,
   ];
-  OrderTab _tab = OrderTab.inProgress;
+  OrderTab _tab = OrderTab.pending;
 
   @override
   Widget build(BuildContext context) {

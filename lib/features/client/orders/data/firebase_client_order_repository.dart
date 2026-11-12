@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../../admin/orders/models/order_item.dart';
 import '../../../admin/orders/models/order_status.dart';
 import '../../../admin/orders/models/restaurant_order.dart';
@@ -8,7 +9,7 @@ class FirebaseClientOrderRepository implements ClientOrderRepository {
   final FirebaseFirestore _db;
 
   FirebaseClientOrderRepository({FirebaseFirestore? firestore})
-      : _db = firestore ?? FirebaseFirestore.instance;
+    : _db = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> get _orders =>
       _db.collection('orders');
@@ -38,6 +39,7 @@ class FirebaseClientOrderRepository implements ClientOrderRepository {
     required String userId,
     required String clientName,
     required String clientPhone,
+    required String tableNumber,
     required List<OrderItem> items,
     required double vatPercent,
   }) async {
@@ -57,6 +59,7 @@ class FirebaseClientOrderRepository implements ClientOrderRepository {
         userId: userId,
         clientName: clientName,
         clientPhone: clientPhone,
+        tableNumber: tableNumber,
         items: items,
         status: OrderStatus.pending,
         createdAt: DateTime.now(),

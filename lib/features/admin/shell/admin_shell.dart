@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+
+import '../dashboard/screens/dashboard_screen.dart';
 import '../gestion_client/screens/clients_screen.dart';
 import '../menu/screens/menu_management_screen.dart';
 import '../orders/screens/orders_screen.dart';
+import '../settings/screens/settings_screen.dart';
 import 'admin_drawer.dart';
 import 'coming_soon_scree.dart';
-import '../settings/screens/settings_screen.dart';
 
 /// Conteneur de l'espace responsable : menu latéral + pages.
 class AdminShell extends StatefulWidget {
@@ -16,7 +18,7 @@ class AdminShell extends StatefulWidget {
 
 class _AdminShellState extends State<AdminShell> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  int _index = 4; // démarre sur "Clients"
+  int _index = 0; // démarre sur "Tableau de bord"
 
   void _openDrawer() => _scaffoldKey.currentState?.openDrawer();
 
@@ -51,7 +53,10 @@ class _AdminShellState extends State<AdminShell> {
       body: IndexedStack(
         index: _index,
         children: [
-          ComingSoonScreen(title: 'Tableau de bord', onMenuTap: _openDrawer),
+          DashboardScreen(
+            onMenuTap: _openDrawer,
+            onSeeOrders: () => setState(() => _index = 1),
+          ),
           OrdersScreen(onMenuTap: _openDrawer),
           ComingSoonScreen(title: 'Statistiques', onMenuTap: _openDrawer),
           MenuManagementScreen(onMenuTap: _openDrawer),

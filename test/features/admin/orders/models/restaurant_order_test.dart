@@ -32,4 +32,25 @@ void main() {
 
     expect(restored.tableNumber, isNull);
   });
+
+  test('keeps the generated invoice when an order is serialized', () {
+    final order = RestaurantOrder(
+      id: 'order-2',
+      number: 1048,
+      clientName: 'Client',
+      clientPhone: '12345678',
+      items: const [],
+      status: OrderStatus.pending,
+      createdAt: DateTime(2026, 11, 13),
+      invoicePdfBase64: 'JVBERi0=',
+    );
+
+    final restored = RestaurantOrder.fromMap(
+      order.id,
+      order.toMap(),
+      createdAt: order.createdAt,
+    );
+
+    expect(restored.invoicePdfBase64, 'JVBERi0=');
+  });
 }

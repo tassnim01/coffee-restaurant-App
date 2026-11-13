@@ -24,5 +24,16 @@ abstract class AuthRepository {
 
   Future<AppUser?> loadProfile(String uid);
 
+  Future<AppUser> updateProfile({
+    required AppUser user,
+    required String name,
+    required String phone,
+    required String email,
+    String? currentPassword,
+    String? newPassword,
+  });
+
+  Future<void> deleteAccount({required String password});
+
   Future<void> logout();
 }

@@ -12,6 +12,7 @@ class RestaurantOrder {
   final OrderStatus status;
   final DateTime createdAt;
   final double vatPercent; // taux appliqué à cette commande (13 = 13 %)
+  final String? invoicePdfBase64;
 
   const RestaurantOrder({
     required this.id,
@@ -24,6 +25,7 @@ class RestaurantOrder {
     required this.status,
     required this.createdAt,
     this.vatPercent = 0,
+    this.invoicePdfBase64,
   });
 
   String get code => '#C-$number';
@@ -46,6 +48,7 @@ class RestaurantOrder {
     'vatPercent': vatPercent,
     'vat': vat,
     'total': total,
+    if (invoicePdfBase64 != null) 'invoicePdfBase64': invoicePdfBase64,
   };
 
   factory RestaurantOrder.fromMap(
@@ -65,5 +68,23 @@ class RestaurantOrder {
     status: orderStatusFromKey(map['status'] as String?),
     createdAt: createdAt,
     vatPercent: (map['vatPercent'] as num?)?.toDouble() ?? 0,
+    invoicePdfBase64: map['invoicePdfBase64'] as String?,
+  );
+
+  RestaurantOrder copyWith({
+    List<OrderItem>? items,
+    String? invoicePdfBase64,
+  }) => RestaurantOrder(
+    id: id,
+    number: number,
+    userId: userId,
+    clientName: clientName,
+    clientPhone: clientPhone,
+    tableNumber: tableNumber,
+    items: items ?? this.items,
+    status: status,
+    createdAt: createdAt,
+    vatPercent: vatPercent,
+    invoicePdfBase64: invoicePdfBase64 ?? this.invoicePdfBase64,
   );
 }

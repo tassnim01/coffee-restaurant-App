@@ -14,4 +14,11 @@ abstract class ClientOrderRepository {
     required List<OrderItem> items,
     required double vatPercent,
   });
+
+  /// Remplace les articles d'une commande uniquement si elle est en attente.
+  Future<void> updatePendingOrder({
+    required String userId,
+    required String orderId,
+    required List<OrderItem> items,
+  });
 }

@@ -61,6 +61,49 @@ class AuthProvider extends ChangeNotifier {
     return _run(() => _repository.login(email: email, password: password));
   }
 
+  Future<bool> updateProfile({
+    required String name,
+    required String phone,
+    required String email,
+    String? currentPassword,
+    String? newPassword,
+  }) async {
+    final user = _user;
+    if (user == null) return false;
+    return _run(
+      () => _repository.updateProfile(
+        user: user,
+        name: name,
+        phone: phone,
+        email: email,
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      ),
+    );
+  }
+
+  Future<bool> deleteAccount({required String password}) async {
+    _busy = true;
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await _repository.deleteAccount(password: password);
+      _user = null;
+      return true;
+    } on AuthFailure catch (e) {
+      _error = e.message;
+      return false;
+    } catch (_) {
+      _error = 'Une erreur est survenue. Réessayez.';
+      return false;
+    } finally {
+      _busy = false;
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void setTableNumber(String tableNumber) {
     final user = _user;
     if (user == null) return;

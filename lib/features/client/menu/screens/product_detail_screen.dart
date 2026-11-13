@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/money.dart';
 import '../../../../core/widgets/product_image.dart';
 import '../../../admin/menu/models/product.dart';
 import '../../../admin/menu/models/supplement.dart';
+import '../../cart/models/cart_item.dart';
 import '../../cart/providers/cart_provider.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
+  final bool selectionMode;
 
-  const ProductDetailScreen({super.key, required this.product});
+  const ProductDetailScreen({
+    super.key,
+    required this.product,
+    this.selectionMode = false,
+  });
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -23,19 +30,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final Set<int> _selected = {};
   bool _favorite = false;
 
-  List<Supplement> get _chosen =>
-      [for (final i in _selected) widget.product.supplements[i]];
+  List<Supplement> get _chosen => [
+    for (final i in _selected) widget.product.supplements[i],
+  ];
 
   void _addToCart() {
     final p = widget.product;
+    if (widget.selectionMode) {
+      Navigator.of(
+        context,
+      ).pop(CartItem.fromProduct(p, supplements: _chosen, quantity: _quantity));
+      return;
+    }
+
     context.read<CartProvider>().add(
-          p,
-          supplements: _chosen,
-          quantity: _quantity,
-        );
+      p,
+      supplements: _chosen,
+      quantity: _quantity,
+    );
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('« ${p.name} » ajouté au panier.')));
+      ..showSnackBar(
+        SnackBar(content: Text('« ${p.name} » ajouté au panier.')),
+      );
     Navigator.of(context).pop();
   }
 
@@ -93,8 +110,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _circleButton(IconData icon, VoidCallback onTap,
-      {Color color = Colors.black}) {
+  Widget _circleButton(
+    IconData icon,
+    VoidCallback onTap, {
+    Color color = Colors.black,
+  }) {
     return Material(
       color: Colors.white.withValues(alpha: 0.9),
       shape: const CircleBorder(),
@@ -121,8 +141,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(p.name,
-              style: AppTextStyles.screenTitle.copyWith(fontSize: 22)),
+          Text(p.name, style: AppTextStyles.screenTitle.copyWith(fontSize: 22)),
           const SizedBox(height: 6),
           Text(
             money(p.price),
@@ -175,8 +194,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             Expanded(child: Text(s.name, style: AppTextStyles.body)),
             Text(
               plusMoney(s.price),
-              style: AppTextStyles.chip
-                  .copyWith(color: AppColors.gray, fontSize: 12.5),
+              style: AppTextStyles.chip.copyWith(
+                color: AppColors.gray,
+                fontSize: 12.5,
+              ),
             ),
           ],
         ),
@@ -210,9 +231,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 _roundButton(Icons.remove_rounded, () {
                   if (_quantity > 1) setState(() => _quantity--);
                 }),
-                Text('$_quantity',
-                    style: AppTextStyles.productName.copyWith(fontSize: 17)),
-                _roundButton(Icons.add_rounded, () => setState(() => _quantity++)),
+                Text(
+                  '$_quantity',
+                  style: AppTextStyles.productName.copyWith(fontSize: 17),
+                ),
+                _roundButton(
+                  Icons.add_rounded,
+                  () => setState(() => _quantity++),
+                ),
               ],
             ),
           ),
@@ -222,9 +248,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             height: 54,
             child: FilledButton.icon(
               onPressed: _addToCart,
-              icon: const Icon(Icons.shopping_cart_outlined,
-                  color: Colors.white, size: 20),
-              label: Text('Ajouter au panier', style: AppTextStyles.button),
+              icon: const Icon(
+                Icons.shopping_cart_outlined,
+                color: Colors.white,
+                size: 20,
+              ),
+              label: Text(
+                widget.selectionMode
+                    ? 'Ajouter à la commande'
+                    : 'Ajouter au panier',
+                style: AppTextStyles.button,
+              ),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.forestGreen,
                 shape: RoundedRectangleBorder(

@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:printing/printing.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -43,6 +46,20 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       if (mounted) _showMessage('Erreur lors de la mise à jour du statut.');
     } finally {
       if (mounted) setState(() => _updating = false);
+    }
+  }
+
+  Future<void> _openInvoice(RestaurantOrder order) async {
+    final encodedPdf = order.invoicePdfBase64;
+    if (encodedPdf == null) return;
+    try {
+      final bytes = base64Decode(encodedPdf);
+      await Printing.layoutPdf(
+        name: 'addition-${order.code.replaceAll('#', '')}.pdf',
+        onLayout: (_) async => bytes,
+      );
+    } catch (_) {
+      if (mounted) _showMessage("Impossible d'ouvrir l'addition PDF.");
     }
   }
 
@@ -182,6 +199,28 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
           child: Column(
             children: [
+              if (order.invoicePdfBase64 != null) ...[
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _openInvoice(order),
+                    icon: const Icon(Icons.picture_as_pdf_outlined),
+                    label: const Text('Ouvrir l’addition PDF'),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(
+                        color: AppColors.forestGreen,
+                        width: 1.3,
+                      ),
+                      foregroundColor: AppColors.forestGreen,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
               if (actionLabel != null) ...[
                 SizedBox(
                   width: double.infinity,

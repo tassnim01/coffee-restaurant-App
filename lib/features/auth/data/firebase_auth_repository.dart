@@ -32,9 +32,13 @@ class FirebaseAuthRepository implements AuthRepository {
         return const AuthFailure('Problème de connexion internet.');
       case 'too-many-requests':
         return const AuthFailure('Trop de tentatives. Réessayez plus tard.');
+      case 'requires-recent-login':
+        return const AuthFailure(
+          'Reconnectez-vous avant de modifier ces informations sensibles.',
+        );
       case 'operation-not-allowed':
         return const AuthFailure(
-          "L'inscription par e-mail n'est pas activée dans Firebase.",
+          "Cette opération n'est pas activée dans Firebase.",
         );
       default:
         return const AuthFailure('Une erreur est survenue. Réessayez.');
@@ -110,12 +114,124 @@ class FirebaseAuthRepository implements AuthRepository {
     final snap = await _db.collection('users').doc(uid).get();
     final data = snap.data();
     if (data == null) return null;
+    final authUser = _auth.currentUser;
+    final authEmail = authUser?.uid == uid ? authUser?.email : null;
+    final email = authEmail ?? data['email'] as String? ?? '';
+    if (authEmail != null && authEmail != data['email']) {
+      final batch = _db.batch();
+      batch.set(_db.collection('users').doc(uid), {
+        'email': authEmail,
+      }, SetOptions(merge: true));
+      batch.set(_db.collection('clients').doc(uid), {
+        'email': authEmail,
+      }, SetOptions(merge: true));
+      await batch.commit();
+    }
     return AppUser(
       uid: uid,
       name: data['name'] as String? ?? '',
       phone: data['phone'] as String? ?? '',
-      email: data['email'] as String? ?? '',
+      email: email,
     );
+  }
+
+  @override
+  Future<AppUser> updateProfile({
+    required AppUser user,
+    required String name,
+    required String phone,
+    required String email,
+    String? currentPassword,
+    String? newPassword,
+  }) async {
+    final trimmedName = name.trim();
+    final trimmedPhone = phone.trim();
+    final trimmedEmail = email.trim();
+    final authUser = _auth.currentUser;
+    if (authUser == null ||
+        authUser.uid != user.uid ||
+        authUser.email == null) {
+      throw const AuthFailure('Aucun compte connecté.');
+    }
+
+    final emailChanged = trimmedEmail != user.email;
+    final passwordChanged = newPassword != null && newPassword.isNotEmpty;
+
+    try {
+      if (emailChanged || passwordChanged) {
+        if (currentPassword == null || currentPassword.isEmpty) {
+          throw const AuthFailure(
+            'Saisissez votre mot de passe actuel pour continuer.',
+          );
+        }
+        final credential = EmailAuthProvider.credential(
+          email: authUser.email!,
+          password: currentPassword,
+        );
+        await authUser.reauthenticateWithCredential(credential);
+      }
+
+      if (emailChanged) {
+        await authUser.verifyBeforeUpdateEmail(trimmedEmail);
+      }
+      if (passwordChanged) {
+        await authUser.updatePassword(newPassword);
+      }
+
+      final batch = _db.batch();
+      batch.set(_db.collection('users').doc(user.uid), {
+        'name': trimmedName,
+        'phone': trimmedPhone,
+      }, SetOptions(merge: true));
+      batch.set(_db.collection('clients').doc(user.uid), {
+        'name': trimmedName,
+        'phone': trimmedPhone,
+      }, SetOptions(merge: true));
+      await batch.commit();
+    } on AuthFailure {
+      rethrow;
+    } on FirebaseAuthException catch (e) {
+      throw _failure(e);
+    } on FirebaseException {
+      throw const AuthFailure('Impossible d’enregistrer le profil. Réessayez.');
+    }
+
+    return AppUser(
+      uid: user.uid,
+      name: trimmedName,
+      phone: trimmedPhone,
+      email: user.email,
+      tableNumber: user.tableNumber,
+    );
+  }
+
+  @override
+  Future<void> deleteAccount({required String password}) async {
+    final user = _auth.currentUser;
+    if (user == null || user.email == null) {
+      throw const AuthFailure('Aucun compte connecté.');
+    }
+
+    try {
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+      await user.reauthenticateWithCredential(credential);
+
+      final batch = _db.batch();
+      batch.delete(_db.collection('users').doc(user.uid));
+      batch.delete(_db.collection('clients').doc(user.uid));
+      await batch.commit();
+
+      await user.delete();
+    } on FirebaseAuthException catch (e) {
+      throw _failure(e);
+    } on FirebaseException {
+      throw const AuthFailure(
+        'Impossible de supprimer les données du compte. Réessayez.',
+      );
+    }
   }
 
   @override

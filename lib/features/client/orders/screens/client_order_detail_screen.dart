@@ -4,17 +4,58 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/money.dart';
+import '../../../admin/menu/models/supplement.dart';
 import '../../../admin/orders/models/order_item.dart';
 import '../../../admin/orders/models/order_status.dart';
 import '../../../admin/orders/models/restaurant_order.dart';
 import '../../../admin/orders/widgets/product_thumb.dart';
 import '../../../admin/orders/widgets/order_status_stepper.dart';
+import '../../cart/models/cart_item.dart';
+import 'client_order_product_menu_screen.dart';
 import '../providers/client_orders_provider.dart';
 
 class ClientOrderDetailScreen extends StatelessWidget {
   final String orderId;
 
   const ClientOrderDetailScreen({super.key, required this.orderId});
+
+  Future<void> _editOrder(BuildContext context, RestaurantOrder order) async {
+    final items = await showModalBottomSheet<List<OrderItem>>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => _EditPendingOrderSheet(items: order.items),
+    );
+    if (items == null || !context.mounted) return;
+
+    try {
+      await context.read<ClientOrdersProvider>().updatePendingOrder(
+        orderId: order.id,
+        items: items,
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Votre commande et son addition ont été modifiées.',
+              ),
+            ),
+          );
+      }
+    } catch (error) {
+      if (!context.mounted) return;
+      final message = error.toString().replaceFirst('Bad state: ', '');
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +92,7 @@ class ClientOrderDetailScreen extends StatelessWidget {
                         ),
                       ),
                     )
-                  : _buildContent(order),
+                  : _buildContent(context, order),
             ),
           ],
         ),
@@ -59,7 +100,7 @@ class ClientOrderDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(RestaurantOrder order) {
+  Widget _buildContent(BuildContext context, RestaurantOrder order) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       child: Column(
@@ -98,9 +139,25 @@ class ClientOrderDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text('Articles', style: AppTextStyles.productName),
+          Row(
+            children: [
+              Expanded(
+                child: Text('Articles', style: AppTextStyles.productName),
+              ),
+              if (order.status == OrderStatus.pending)
+                TextButton.icon(
+                  onPressed: () => _editOrder(
+                    context,
+                    context.read<ClientOrdersProvider>().byId(order.id) ??
+                        order,
+                  ),
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: const Text('Modifier'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.forestGreen,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 10),
           ...order.items.map(_itemRow),
@@ -209,4 +266,201 @@ class ClientOrderDetailScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _EditPendingOrderSheet extends StatefulWidget {
+  final List<OrderItem> items;
+
+  const _EditPendingOrderSheet({required this.items});
+
+  @override
+  State<_EditPendingOrderSheet> createState() => _EditPendingOrderSheetState();
+}
+
+class _EditPendingOrderSheetState extends State<_EditPendingOrderSheet> {
+  late final List<OrderItem> _items = List.of(widget.items);
+
+  double get _total => _items.fold(0, (total, item) => total + item.lineTotal);
+
+  void _changeQuantity(int index, int delta) {
+    final item = _items[index];
+    final quantity = item.quantity + delta;
+    setState(() {
+      if (quantity <= 0) {
+        _items.removeAt(index);
+      } else {
+        _items[index] = OrderItem(
+          productId: item.productId,
+          name: item.name,
+          quantity: quantity,
+          unitPrice: item.unitPrice,
+          imageUrl: item.imageUrl,
+          supplements: item.supplements,
+        );
+      }
+    });
+  }
+
+  Future<void> _addProduct() async {
+    final item = await Navigator.of(context).push<CartItem>(
+      MaterialPageRoute(builder: (_) => const ClientOrderProductMenuScreen()),
+    );
+    if (item == null || !mounted) return;
+    final orderItem = OrderItem(
+      productId: item.productId,
+      name: item.name,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      imageUrl: item.imageUrl,
+      supplements: item.supplements,
+    );
+
+    final index = _items.indexWhere(
+      (existing) =>
+          existing.productId == orderItem.productId &&
+          _sameSupplements(existing.supplements, orderItem.supplements),
+    );
+    setState(() {
+      if (index == -1) {
+        _items.add(orderItem);
+      } else {
+        final existing = _items[index];
+        _items[index] = OrderItem(
+          productId: existing.productId,
+          name: existing.name,
+          quantity: existing.quantity + orderItem.quantity,
+          unitPrice: existing.unitPrice,
+          imageUrl: existing.imageUrl,
+          supplements: existing.supplements,
+        );
+      }
+    });
+  }
+
+  bool _sameSupplements(List<Supplement> left, List<Supplement> right) {
+    if (left.length != right.length) return false;
+    final leftSorted = [...left]..sort((a, b) => a.name.compareTo(b.name));
+    final rightSorted = [...right]..sort((a, b) => a.name.compareTo(b.name));
+    for (var i = 0; i < leftSorted.length; i++) {
+      if (leftSorted[i].name != rightSorted[i].name ||
+          leftSorted[i].price != rightSorted[i].price) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.fromLTRB(
+      16,
+      20,
+      16,
+      16 + MediaQuery.of(context).viewInsets.bottom,
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Modifier la commande', style: AppTextStyles.screenTitle),
+        const SizedBox(height: 6),
+        Text(
+          'Vous pouvez modifier les quantités ou retirer des articles tant '
+          'que la commande est en attente.',
+          style: AppTextStyles.body.copyWith(color: AppColors.gray),
+        ),
+        const SizedBox(height: 16),
+        Flexible(
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: _items.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final item = _items[index];
+              return Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(item.name, style: AppTextStyles.productName),
+                          if (item.supplements.isNotEmpty)
+                            Text(
+                              item.supplements
+                                  .map((supplement) => supplement.name)
+                                  .join(', '),
+                              style: AppTextStyles.chip.copyWith(
+                                color: AppColors.gray,
+                              ),
+                            ),
+                          Text(
+                            money(item.lineTotal),
+                            style: AppTextStyles.body,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => _changeQuantity(index, -1),
+                      icon: const Icon(Icons.remove_circle_outline),
+                    ),
+                    Text('${item.quantity}', style: AppTextStyles.productName),
+                    IconButton(
+                      onPressed: () => _changeQuantity(index, 1),
+                      icon: const Icon(Icons.add_circle_outline),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: _addProduct,
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Ajouter d’autres produits'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.forestGreen,
+              side: const BorderSide(color: AppColors.forestGreen),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            Expanded(
+              child: Text('Total (hors TVA)', style: AppTextStyles.body),
+            ),
+            Text(money(_total), style: AppTextStyles.productName),
+          ],
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: FilledButton(
+            onPressed: _items.isEmpty
+                ? null
+                : () => Navigator.of(context).pop(List.of(_items)),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.forestGreen,
+            ),
+            child: const Text('Enregistrer les modifications'),
+          ),
+        ),
+      ],
+    ),
+  );
 }

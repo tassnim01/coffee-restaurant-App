@@ -92,6 +92,21 @@ class ClientOrdersProvider extends ChangeNotifier {
     );
   }
 
+  Future<void> updatePendingOrder({
+    required String orderId,
+    required List<OrderItem> items,
+  }) async {
+    final userId = _uid;
+    if (userId == null) {
+      throw StateError('Connectez-vous pour modifier cette commande.');
+    }
+    await _repository.updatePendingOrder(
+      userId: userId,
+      orderId: orderId,
+      items: items,
+    );
+  }
+
   @override
   void dispose() {
     _disposed = true;

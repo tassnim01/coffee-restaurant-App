@@ -14,7 +14,6 @@ import '../../../../core/widgets/product_image.dart';
 import '../../../../core/widgets/quantity_stepper.dart';
 import '../models/cart_item.dart';
 import '../providers/cart_provider.dart';
-import '../../../admin/settings/providers/settings_provider.dart';
 
 class CartScreen extends StatelessWidget {
   final VoidCallback onBack;
@@ -33,7 +32,7 @@ class CartScreen extends StatelessWidget {
     if (confirmed) cart.clear();
   }
 
-  Future<void> _validate(BuildContext context, double vatPercent) async {
+  Future<void> _validate(BuildContext context) async {
     final auth = context.read<AuthProvider>();
     final cart = context.read<CartProvider>();
     final orders = context.read<ClientOrdersProvider>();
@@ -66,11 +65,7 @@ class CartScreen extends StatelessWidget {
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
     try {
-      await orders.placeOrder(
-        user: updatedUser,
-        items: cart.items,
-        vatPercent: vatPercent,
-      );
+      await orders.placeOrder(user: updatedUser, items: cart.items);
       cart.clear();
       if (!context.mounted) return;
       navigator.pop(); // ferme le chargement
@@ -92,7 +87,6 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
-    final vatPercent = context.watch<SettingsProvider>().vatPercent;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
@@ -115,7 +109,7 @@ class CartScreen extends StatelessWidget {
                       ),
                     ),
             ),
-            if (!cart.isEmpty) _buildSummary(context, cart, vatPercent),
+            if (!cart.isEmpty) _buildSummary(context, cart),
           ],
         ),
       ),
@@ -135,13 +129,13 @@ class CartScreen extends StatelessWidget {
         children: [
           IconButton(
             onPressed: onBack,
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back_rounded,
               color: AppColors.textPrimary,
               size: 26,
             ),
           ),
-          const Icon(
+          Icon(
             Icons.shopping_bag_outlined,
             color: AppColors.forestGreen,
             size: 22,
@@ -159,7 +153,7 @@ class CartScreen extends StatelessWidget {
             IconButton(
               onPressed: () => _clear(context),
               tooltip: 'Vider le panier',
-              icon: const Icon(
+              icon: Icon(
                 Icons.delete_outline_rounded,
                 color: AppColors.textPrimary,
                 size: 24,
@@ -175,11 +169,7 @@ class CartScreen extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.shopping_bag_outlined,
-            size: 56,
-            color: AppColors.gray,
-          ),
+          Icon(Icons.shopping_bag_outlined, size: 56, color: AppColors.gray),
           const SizedBox(height: 12),
           Text('Votre panier est vide', style: AppTextStyles.screenTitle),
           const SizedBox(height: 6),
@@ -204,11 +194,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummary(
-    BuildContext context,
-    CartProvider cart,
-    double vatPercent,
-  ) {
+  Widget _buildSummary(BuildContext context, CartProvider cart) {
     Widget row(String label, String value, {bool big = false}) => Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -240,7 +226,7 @@ class CartScreen extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: const Border(top: BorderSide(color: AppColors.border)),
+        border: Border(top: BorderSide(color: AppColors.border)),
         boxShadow: [
           BoxShadow(
             color: AppColors.black.withValues(alpha: 0.05),
@@ -252,19 +238,17 @@ class CartScreen extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          row('Sous-total', money(cart.subtotal)),
-          row('TVA (${percent(vatPercent)}%)', money(cart.vatFor(vatPercent))),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 6),
+          row('Total', money(cart.subtotal), big: true),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
             child: Divider(height: 1, color: AppColors.border),
           ),
-          row('TVA (${percent(vatPercent)}%)', money(cart.vatFor(vatPercent))),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             height: 52,
             child: FilledButton(
-              onPressed: () => _validate(context, vatPercent),
+              onPressed: () => _validate(context),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.forestGreen,
                 shape: RoundedRectangleBorder(

@@ -25,14 +25,12 @@ void main() {
       ],
       status: OrderStatus.pending,
       createdAt: DateTime(2026, 11, 13, 9, 30),
-      vatPercent: 13,
     );
 
     final pdf = await OrderInvoiceGenerator.generate(order);
 
     expect(String.fromCharCodes(pdf.take(5)), '%PDF-');
     expect(order.subtotal, 10);
-    expect(order.vat, closeTo(1.3, 0.0001));
-    expect(order.total, closeTo(11.3, 0.0001));
+    expect(order.total, 10);
   });
 }

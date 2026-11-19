@@ -6,4 +6,5 @@ abstract class OrderRepository {
   Stream<List<RestaurantOrder>> watchOrders();
 
   Future<void> updateStatus(String orderId, OrderStatus status);
+  Future<void> confirmPayment(String orderId);
 }

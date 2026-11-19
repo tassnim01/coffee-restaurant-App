@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
 
 /// Associe une clé (stockée dans Firestore) à une icône et des couleurs.
@@ -26,14 +27,27 @@ class CategoryIcons {
       case 'coffee':
       case 'fastfood':
       case 'bakery':
-        return (bg: AppColors.warmBeige.withValues(alpha: 0.6), fg: AppColors.forestGreen);
+        return (
+          bg: AppColors.isDarkMode
+              ? AppColors.warmBeige.withValues(alpha: 0.18)
+              : AppColors.warmBeige.withValues(alpha: 0.6),
+          fg: AppColors.brandForeground,
+        );
       case 'drink':
       case 'dish':
       case 'dessert':
       case 'icecream':
-        return (bg: AppColors.burgundy.withValues(alpha: 0.14), fg: AppColors.burgundy);
+        return (
+          bg: AppColors.danger.withValues(
+            alpha: AppColors.isDarkMode ? 0.18 : 0.14,
+          ),
+          fg: AppColors.danger,
+        );
       default:
-        return (bg: AppColors.forestGreen.withValues(alpha: 0.14), fg: AppColors.forestGreen);
+        return (
+          bg: AppColors.brandForeground.withValues(alpha: 0.16),
+          fg: AppColors.brandForeground,
+        );
     }
   }
 }

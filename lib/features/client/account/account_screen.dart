@@ -10,6 +10,8 @@ import '../../auth/models/app_user.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/widgets/auth_sheet.dart';
 import '../orders/screens/my_orders_screen.dart';
+import '../settings/screens/client_settings_screen.dart';
+import '../settings/screens/profile_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -42,21 +44,6 @@ class AccountScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _deleteAccount(BuildContext context) async {
-    final password = await showDialog<String>(
-      context: context,
-      builder: (_) => const _DeleteAccountDialog(),
-    );
-    if (password == null || !context.mounted) return;
-
-    final auth = context.read<AuthProvider>();
-    if (await auth.deleteAccount(password: password)) {
-      if (context.mounted) _showInfo(context, 'Votre compte a été supprimé.');
-    } else if (context.mounted) {
-      _showInfo(context, auth.error ?? 'Erreur lors de la suppression.');
-    }
-  }
-
   void _showInfo(BuildContext context, String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -71,111 +58,204 @@ class AccountScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Compte', style: AppTextStyles.screenTitle),
-              const SizedBox(height: 20),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: const BoxDecoration(
-                        color: AppColors.chipBackground,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.person_rounded,
-                        size: 30,
-                        color: AppColors.gray,
-                      ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text('Compte', style: AppTextStyles.screenTitle),
+                  ),
+                  IconButton(
+                    tooltip: 'Paramètres',
+                    onPressed: () => _openSettings(context, user),
+                    icon: const Icon(
+                      Icons.settings_rounded,
+                      color: AppColors.forestGreen,
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: user == null
-                          ? Text(
-                              'Vous n\'êtes pas connecté.',
-                              style: AppTextStyles.body,
-                            )
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  user.name,
-                                  style: AppTextStyles.productName,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  user.email,
-                                  style: AppTextStyles.chip.copyWith(
-                                    color: AppColors.gray,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text(
-                                  user.phone,
-                                  style: AppTextStyles.chip.copyWith(
-                                    color: AppColors.gray,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              if (user == null) ...[
-                _button(
-                  "S'inscrire",
-                  filled: true,
-                  onTap: () => showAuthSheet(context),
-                ),
-                const SizedBox(height: 10),
-                _button(
-                  'Se connecter',
-                  onTap: () => showAuthSheet(context, startWithLogin: true),
-                ),
-              ] else ...[
-                _button(
-                  'Mes commandes',
-                  filled: true,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const MyOrdersScreen()),
+              const SizedBox(height: 16),
+              if (user == null)
+                Expanded(
+                  child: ListView(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 68,
+                              height: 68,
+                              decoration: BoxDecoration(
+                                color: AppColors.chipBackground,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.person_rounded,
+                                size: 38,
+                                color: AppColors.gray,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                "Vous n'êtes pas connecté.",
+                                style: AppTextStyles.body.copyWith(
+                                  color: AppColors.gray,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _button(
+                        "S'inscrire",
+                        filled: true,
+                        onTap: () => showAuthSheet(context),
+                      ),
+                      const SizedBox(height: 12),
+                      _button(
+                        'Se connecter',
+                        onTap: () =>
+                            showAuthSheet(context, startWithLogin: true),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView(
+                    children: [
+                      InkWell(
+                        onTap: () => _openProfile(context, user),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Row(
+                            children: [
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Container(
+                                    width: 68,
+                                    height: 68,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.chipBackground,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.person_rounded,
+                                      size: 38,
+                                      color: AppColors.forestGreen,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: -2,
+                                    bottom: -2,
+                                    child: Container(
+                                      width: 26,
+                                      height: 26,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.forestGreen,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: AppColors.surface,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: const Icon(
+                                        Icons.camera_alt_rounded,
+                                        size: 14,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      user.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTextStyles.productName,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      user.email,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTextStyles.body.copyWith(
+                                        color: AppColors.gray,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(
+                                Icons.chevron_right_rounded,
+                                color: AppColors.gray,
+                                size: 28,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _button(
+                        'Mes commandes',
+                        filled: true,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const MyOrdersScreen(),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 10),
-                _button(
-                  'Modifier mes informations',
-                  onTap: auth.isLoading
-                      ? null
-                      : () => _editProfile(context, user),
-                ),
-                const SizedBox(height: 10),
-                _button(
-                  'Se déconnecter',
-                  onTap: auth.isLoading ? null : () => auth.logout(),
-                ),
-                const SizedBox(height: 10),
-                _button(
-                  'Supprimer mon compte',
-                  color: AppColors.burgundy,
-                  onTap: auth.isLoading ? null : () => _deleteAccount(context),
-                ),
-              ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _openProfile(BuildContext context, AppUser user) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            ProfileScreen(onEdit: () => _editProfile(context, user)),
+      ),
+    );
+  }
+
+  void _openSettings(BuildContext context, AppUser? user) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ClientSettingsScreen(
+          onEditProfile: user == null
+              ? null
+              : () => _editProfile(context, user),
         ),
       ),
     );
@@ -385,68 +465,6 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
         obscureText: true,
         validator: validator,
         decoration: appInputDecoration(),
-      ),
-    ],
-  );
-}
-
-class _DeleteAccountDialog extends StatefulWidget {
-  const _DeleteAccountDialog();
-
-  @override
-  State<_DeleteAccountDialog> createState() => _DeleteAccountDialogState();
-}
-
-class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _password = TextEditingController();
-
-  @override
-  void dispose() {
-    _password.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => AlertDialog(
-    backgroundColor: AppColors.surface,
-    title: Text('Supprimer mon compte', style: AppTextStyles.screenTitle),
-    content: Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Cette action est définitive. Saisissez votre mot de passe '
-            'pour confirmer la suppression.',
-            style: AppTextStyles.body,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _password,
-            obscureText: true,
-            autofocus: true,
-            decoration: appInputDecoration(hint: 'Mot de passe'),
-            validator: (value) => value == null || value.isEmpty
-                ? 'Le mot de passe est obligatoire.'
-                : null,
-          ),
-        ],
-      ),
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Annuler'),
-      ),
-      FilledButton(
-        onPressed: () {
-          if (!_formKey.currentState!.validate()) return;
-          Navigator.of(context).pop(_password.text);
-        },
-        style: FilledButton.styleFrom(backgroundColor: AppColors.burgundy),
-        child: const Text('Supprimer'),
       ),
     ],
   );

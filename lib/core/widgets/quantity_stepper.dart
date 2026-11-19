@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
@@ -41,7 +42,7 @@ class QuantityStepper extends StatelessWidget {
         height: 32,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: AppColors.black, width: 1.3),
+          border: Border.all(color: AppColors.border, width: 1.3),
         ),
         child: Icon(icon, size: 18),
       ),

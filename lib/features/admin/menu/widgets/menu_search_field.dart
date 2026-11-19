@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
@@ -38,13 +39,19 @@ class _MenuSearchFieldState extends State<MenuSearchField> {
       decoration: InputDecoration(
         hintText: widget.hint,
         hintStyle: AppTextStyles.hint,
-        prefixIcon:
-            const Icon(Icons.search_rounded, color: AppColors.gray, size: 22),
+        prefixIcon: const Icon(
+          Icons.search_rounded,
+          color: AppColors.gray,
+          size: 22,
+        ),
         suffixIcon: _controller.text.isEmpty
             ? null
             : IconButton(
-                icon: const Icon(Icons.close_rounded,
-                    color: AppColors.gray, size: 20),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: AppColors.gray,
+                  size: 20,
+                ),
                 onPressed: () {
                   _controller.clear();
                   setState(() {});
@@ -56,12 +63,14 @@ class _MenuSearchFieldState extends State<MenuSearchField> {
         contentPadding: const EdgeInsets.symmetric(vertical: 14),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide:
-              const BorderSide(color: AppColors.forestGreen, width: 1.4),
+          borderSide: const BorderSide(
+            color: AppColors.forestGreen,
+            width: 1.4,
+          ),
         ),
       ),
     );

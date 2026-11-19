@@ -32,8 +32,9 @@ class DashboardStats {
     return DashboardStats(
       todayCount: today.length,
       todayRevenue: today.fold(0.0, (sum, o) => sum + o.total),
-      inProgress: count((s) =>
-          s == OrderStatus.received || s == OrderStatus.preparing),
+      inProgress: count(
+        (s) => s == OrderStatus.received || s == OrderStatus.preparing,
+      ),
       ready: count((s) => s == OrderStatus.ready),
       delivered: count((s) => s == OrderStatus.delivered),
       recent: orders.take(5).toList(),

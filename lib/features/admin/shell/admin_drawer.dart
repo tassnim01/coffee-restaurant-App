@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../../../core/theme/app_colors.dart';
 
 class _DrawerEntry {
@@ -51,12 +52,17 @@ class AdminDrawer extends StatelessWidget {
                 onTap: onLogout,
                 borderRadius: BorderRadius.circular(14),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
                   child: Row(
                     children: [
-                      const Icon(Icons.logout_rounded,
-                          color: Colors.white70, size: 22),
+                      const Icon(
+                        Icons.logout_rounded,
+                        color: Colors.white70,
+                        size: 22,
+                      ),
                       const SizedBox(width: 14),
                       Text(
                         'Déconnexion',
@@ -89,8 +95,11 @@ class AdminDrawer extends StatelessWidget {
               color: AppColors.warmBeige,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.restaurant_rounded,
-                color: AppColors.black, size: 24),
+            child: const Icon(
+              Icons.restaurant_rounded,
+              color: AppColors.black,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -110,10 +119,7 @@ class AdminDrawer extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Bonjour, Chef !',
-                  style: GoogleFonts.inter(
-                    color: AppColors.gray,
-                    fontSize: 12,
-                  ),
+                  style: GoogleFonts.inter(color: AppColors.gray, fontSize: 12),
                 ),
               ],
             ),

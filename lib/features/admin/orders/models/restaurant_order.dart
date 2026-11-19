@@ -11,8 +11,8 @@ class RestaurantOrder {
   final List<OrderItem> items;
   final OrderStatus status;
   final DateTime createdAt;
-  final double vatPercent; // taux appliqué à cette commande (13 = 13 %)
   final String? invoicePdfBase64;
+  final bool isPaid; // true après confirmation du paiement en espèces
 
   const RestaurantOrder({
     required this.id,
@@ -24,15 +24,14 @@ class RestaurantOrder {
     required this.items,
     required this.status,
     required this.createdAt,
-    this.vatPercent = 0,
     this.invoicePdfBase64,
+    this.isPaid = false,
   });
 
   String get code => '#C-$number';
 
   double get subtotal => items.fold<double>(0, (sum, i) => sum + i.lineTotal);
-  double get vat => subtotal * vatPercent / 100;
-  double get total => subtotal + vat;
+  double get total => subtotal;
 
   String? get coverImage => items.isEmpty ? null : items.first.imageUrl;
 
@@ -45,8 +44,6 @@ class RestaurantOrder {
     'items': items.map((i) => i.toMap()).toList(),
     'status': status.name,
     'subtotal': subtotal,
-    'vatPercent': vatPercent,
-    'vat': vat,
     'total': total,
     if (invoicePdfBase64 != null) 'invoicePdfBase64': invoicePdfBase64,
   };
@@ -67,8 +64,8 @@ class RestaurantOrder {
         .toList(),
     status: orderStatusFromKey(map['status'] as String?),
     createdAt: createdAt,
-    vatPercent: (map['vatPercent'] as num?)?.toDouble() ?? 0,
     invoicePdfBase64: map['invoicePdfBase64'] as String?,
+    isPaid: map['isPaid'] as bool? ?? false,
   );
 
   RestaurantOrder copyWith({
@@ -84,7 +81,6 @@ class RestaurantOrder {
     items: items ?? this.items,
     status: status,
     createdAt: createdAt,
-    vatPercent: vatPercent,
     invoicePdfBase64: invoicePdfBase64 ?? this.invoicePdfBase64,
   );
 }

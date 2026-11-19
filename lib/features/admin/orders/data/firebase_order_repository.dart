@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../menu/data/mock_menu_data.dart';
 import '../models/order_item.dart';
 import '../models/order_status.dart';
@@ -10,7 +11,7 @@ class FirebaseOrderRepository implements OrderRepository {
   final FirebaseFirestore _db;
 
   FirebaseOrderRepository({FirebaseFirestore? firestore})
-      : _db = firestore ?? FirebaseFirestore.instance;
+    : _db = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> get _orders =>
       _db.collection('orders');
@@ -23,9 +24,10 @@ class FirebaseOrderRepository implements OrderRepository {
       doc.id,
       data,
       // null = horodatage serveur pas encore reçu (écriture en cours)
-      createdAt: ts is Timestamp 
-      ? ts.toDate() //if
-      : DateTime.now(), //else
+      createdAt: ts is Timestamp
+          ? ts
+                .toDate() //if
+          : DateTime.now(), //else
     );
   }
 
@@ -65,63 +67,66 @@ class FirebaseOrderRepository implements OrderRepository {
     if (existing.docs.isNotEmpty) return;
 
     final now = DateTime.now();
-    final demo = <({
-      int number,
-      String name,
-      String phone,
-      OrderStatus status,
-      int minutesAgo,
-      List<OrderItem> items,
-    })>[
-      (
-        number: 1046,
-        name: 'Nour Ben Salah',
-        phone: '+216 50 112 233',
-        status: OrderStatus.pending,
-        minutesAgo: 2,
-        items: [_item('p3', 2)],
-      ),
-      (
-        number: 1045,
-        name: 'Ahmed Ben Ali',
-        phone: '+216 98 123 456',
-        status: OrderStatus.preparing,
-        minutesAgo: 10,
-        items: [_item('p1', 2), _item('p5', 1), _item('p6', 1)],
-      ),
-      (
-        number: 1044,
-        name: 'Sara Mahfoudh',
-        phone: '+216 22 345 678',
-        status: OrderStatus.ready,
-        minutesAgo: 25,
-        items: [_item('p2', 2), _item('p5', 1)],
-      ),
-      (
-        number: 1043,
-        name: 'Yassine Trabelsi',
-        phone: '+216 55 678 901',
-        status: OrderStatus.preparing,
-        minutesAgo: 40,
-        items: [_item('p3', 1), _item('p6', 1)],
-      ),
-      (
-        number: 1042,
-        name: 'Leila Jaziri',
-        phone: '+216 97 234 567',
-        status: OrderStatus.delivered,
-        minutesAgo: 70,
-        items: [_item('p4', 2), _item('p5', 1)],
-      ),
-      (
-        number: 1041,
-        name: 'Mohamed Gharbi',
-        phone: '+216 29 876 543',
-        status: OrderStatus.delivered,
-        minutesAgo: 95,
-        items: [_item('p4', 1), _item('p2', 1)],
-      ),
-    ];
+    final demo =
+        <
+          ({
+            int number,
+            String name,
+            String phone,
+            OrderStatus status,
+            int minutesAgo,
+            List<OrderItem> items,
+          })
+        >[
+          (
+            number: 1046,
+            name: 'Nour Ben Salah',
+            phone: '+216 50 112 233',
+            status: OrderStatus.pending,
+            minutesAgo: 2,
+            items: [_item('p3', 2)],
+          ),
+          (
+            number: 1045,
+            name: 'Ahmed Ben Ali',
+            phone: '+216 98 123 456',
+            status: OrderStatus.preparing,
+            minutesAgo: 10,
+            items: [_item('p1', 2), _item('p5', 1), _item('p6', 1)],
+          ),
+          (
+            number: 1044,
+            name: 'Sara Mahfoudh',
+            phone: '+216 22 345 678',
+            status: OrderStatus.ready,
+            minutesAgo: 25,
+            items: [_item('p2', 2), _item('p5', 1)],
+          ),
+          (
+            number: 1043,
+            name: 'Yassine Trabelsi',
+            phone: '+216 55 678 901',
+            status: OrderStatus.preparing,
+            minutesAgo: 40,
+            items: [_item('p3', 1), _item('p6', 1)],
+          ),
+          (
+            number: 1042,
+            name: 'Leila Jaziri',
+            phone: '+216 97 234 567',
+            status: OrderStatus.delivered,
+            minutesAgo: 70,
+            items: [_item('p4', 2), _item('p5', 1)],
+          ),
+          (
+            number: 1041,
+            name: 'Mohamed Gharbi',
+            phone: '+216 29 876 543',
+            status: OrderStatus.delivered,
+            minutesAgo: 95,
+            items: [_item('p4', 1), _item('p2', 1)],
+          ),
+        ];
 
     final batch = _db.batch();
     for (final o in demo) {
@@ -136,10 +141,19 @@ class FirebaseOrderRepository implements OrderRepository {
       );
       batch.set(_orders.doc(), {
         ...order.toMap(),
-        'createdAt':
-            Timestamp.fromDate(now.subtract(Duration(minutes: o.minutesAgo))),
+        'createdAt': Timestamp.fromDate(
+          now.subtract(Duration(minutes: o.minutesAgo)),
+        ),
       });
     }
     await batch.commit();
+  }
+
+  @override
+  Future<void> confirmPayment(String orderId) {
+    return _orders.doc(orderId).update({
+      'isPaid': true,
+      'paidAt': FieldValue.serverTimestamp(),
+    });
   }
 }

@@ -70,11 +70,6 @@ class OrderInvoiceGenerator {
             ],
           ),
           pw.SizedBox(height: 18),
-          _totalRow('Sous-total', order.subtotal),
-          if (order.vatPercent > 0) ...[
-            _totalRow('TVA (${_percent(order.vatPercent)} %)', order.vat),
-          ],
-          pw.Divider(),
           _totalRow('TOTAL', order.total, bold: true),
           pw.SizedBox(height: 20),
           pw.Text('Paiement en especes a la caisse.'),
@@ -119,10 +114,6 @@ class OrderInvoiceGenerator {
       );
 
   static String _money(double value) => '${value.toStringAsFixed(3)} DT';
-
-  static String _percent(double value) => value == value.roundToDouble()
-      ? value.toStringAsFixed(0)
-      : value.toString();
 
   static String _dateTime(DateTime value) =>
       '${value.day.toString().padLeft(2, '0')}/'

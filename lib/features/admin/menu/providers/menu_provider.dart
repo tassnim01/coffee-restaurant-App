@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' hide Category;
+
 import '../data/menu_repository.dart';
 import '../models/category.dart';
 import '../models/product.dart';
@@ -29,7 +30,8 @@ class MenuProvider extends ChangeNotifier {
     return _products.where((p) {
       final matchesCategory =
           _selectedCategoryId == null || p.categoryId == _selectedCategoryId;
-      final matchesSearch = query.isEmpty ||
+      final matchesSearch =
+          query.isEmpty ||
           p.name.toLowerCase().contains(query) ||
           p.description.toLowerCase().contains(query);
       return matchesCategory && matchesSearch;
@@ -94,8 +96,9 @@ class MenuProvider extends ChangeNotifier {
   Future<void> toggleAvailability(String productId) async {
     final i = _products.indexWhere((p) => p.id == productId);
     if (i == -1) return;
-    final updated =
-        _products[i].copyWith(isAvailable: !_products[i].isAvailable);
+    final updated = _products[i].copyWith(
+      isAvailable: !_products[i].isAvailable,
+    );
     _products[i] = updated; // optimistic update
     notifyListeners();
     await _repository.updateProduct(updated);

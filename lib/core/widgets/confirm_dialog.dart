@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
@@ -29,8 +30,9 @@ Future<bool> showConfirmDialog(
           onPressed: () => Navigator.of(ctx).pop(true),
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.burgundy,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
           child: Text(confirmLabel, style: AppTextStyles.button),
         ),

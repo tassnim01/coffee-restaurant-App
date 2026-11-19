@@ -16,11 +16,23 @@ class ClientHomeScreen extends StatelessWidget {
   /// Appelé par "Voir tout" (ex. aller à l'onglet Menu).
   final VoidCallback? onSeeAll;
 
-  static const _categories = [
+  static List<_Category> get _categories => [
     _Category('Cafés', Icons.coffee_outlined, AppColors.chipBackground),
-    _Category('Boissons', Icons.local_drink_outlined, Color(0xFFE9DCC0)),
-    _Category('Fast-food', Icons.lunch_dining_outlined, Color(0xFFD6E0D1)),
-    _Category('Plats', Icons.restaurant_outlined, Color(0xFFEAD3D0)),
+    _Category(
+      'Boissons',
+      Icons.local_drink_outlined,
+      AppColors.isDarkMode ? const Color(0xFF3B3529) : const Color(0xFFE9DCC0),
+    ),
+    _Category(
+      'Fast-food',
+      Icons.lunch_dining_outlined,
+      AppColors.isDarkMode ? const Color(0xFF303A32) : const Color(0xFFD6E0D1),
+    ),
+    _Category(
+      'Plats',
+      Icons.restaurant_outlined,
+      AppColors.isDarkMode ? const Color(0xFF3A302F) : const Color(0xFFEAD3D0),
+    ),
     _Category('Desserts', Icons.cake_outlined, AppColors.chipBackground),
   ];
 
@@ -40,7 +52,7 @@ class ClientHomeScreen extends StatelessWidget {
             Expanded(
               child: Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.background,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
                 ),
@@ -51,7 +63,7 @@ class ClientHomeScreen extends StatelessWidget {
                     const SizedBox(height: 22),
                     Row(
                       children: [
-                        const Text(
+                        Text(
                           'Catégories',
                           style: TextStyle(
                             fontSize: 18,
@@ -207,10 +219,10 @@ class _SearchBar extends StatelessWidget {
     return TextField(
       decoration: InputDecoration(
         hintText: 'Rechercher un plat...',
-        hintStyle: const TextStyle(color: AppColors.textSecondary),
-        prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+        hintStyle: TextStyle(color: AppColors.textSecondary),
+        prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.surface,
         contentPadding: const EdgeInsets.symmetric(vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -239,12 +251,16 @@ class _CategoryItem extends StatelessWidget {
               color: category.color,
               shape: BoxShape.circle,
             ),
-            child: Icon(category.icon, color: AppColors.forestGreen, size: 30),
+            child: Icon(
+              category.icon,
+              color: AppColors.brandForeground,
+              size: 30,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             category.label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -286,7 +302,7 @@ class _PromoCard extends StatelessWidget {
           Container(
             width: 70,
             height: 70,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Colors.white12,
               shape: BoxShape.circle,
             ),

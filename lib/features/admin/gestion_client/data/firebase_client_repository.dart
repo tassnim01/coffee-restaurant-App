@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../models/restaurant_client.dart';
 import 'client_repository.dart';
 
@@ -7,7 +8,7 @@ class FirebaseClientRepository implements ClientRepository {
   final FirebaseFirestore _db;
 
   FirebaseClientRepository({FirebaseFirestore? firestore})
-      : _db = firestore ?? FirebaseFirestore.instance;
+    : _db = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> get _clients =>
       _db.collection('clients');

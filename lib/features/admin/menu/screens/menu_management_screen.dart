@@ -191,7 +191,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
             height: 38,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.black, width: 1.4),
+              border: Border.all(color: AppColors.border, width: 1.4),
             ),
             child: const Icon(Icons.add_rounded, size: 22),
           ),
@@ -270,7 +270,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.search_off_rounded, size: 46, color: AppColors.gray),
+          Icon(Icons.search_off_rounded, size: 46, color: AppColors.gray),
           const SizedBox(height: 10),
           Text(
             'Aucun produit trouvé',

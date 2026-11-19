@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:printing/printing.dart';
@@ -14,6 +12,8 @@ import '../models/restaurant_order.dart';
 import '../providers/orders_provider.dart';
 import '../widgets/order_status_chip.dart';
 import 'order_tracking_screen.dart';
+import '../../../payment/widgets/payment_section.dart';
+import '../../../client/orders/services/order_invoice_generator.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
   final String orderId;
@@ -26,6 +26,7 @@ class OrderDetailsScreen extends StatefulWidget {
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   bool _updating = false;
+  bool _paymentPromptShown = false;
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context)
@@ -50,10 +51,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Future<void> _openInvoice(RestaurantOrder order) async {
-    final encodedPdf = order.invoicePdfBase64;
-    if (encodedPdf == null) return;
     try {
-      final bytes = base64Decode(encodedPdf);
+      final bytes = await OrderInvoiceGenerator.generate(order);
       await Printing.layoutPdf(
         name: 'addition-${order.code.replaceAll('#', '')}.pdf',
         onLayout: (_) async => bytes,
@@ -63,9 +62,146 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     }
   }
 
+  void _maybePromptPayment(RestaurantOrder order) {
+    if (_paymentPromptShown ||
+        order.status != OrderStatus.delivered ||
+        order.isPaid) {
+      return;
+    }
+
+    _paymentPromptShown = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final confirmed = await _showUnpaidPaymentDialog(order);
+      if (confirmed && mounted) {
+        _showMessage(
+          'Paiement de ${order.code} confirmé${order.tableNumber == null || order.tableNumber!.isEmpty ? '' : ' — table ${order.tableNumber}'}.',
+        );
+      }
+    });
+  }
+
+  Future<bool> _showUnpaidPaymentDialog(RestaurantOrder order) async {
+    var busy = false;
+    String? error;
+    final table = order.tableNumber?.trim();
+    final tableLabel = table == null || table.isEmpty
+        ? 'Table non renseignée'
+        : 'Table $table';
+
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => StatefulBuilder(
+            builder: (context, setDialogState) => AlertDialog(
+              backgroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(26),
+              ),
+              icon: const Icon(
+                Icons.lock_rounded,
+                color: AppColors.burgundy,
+                size: 38,
+              ),
+              title: Text(
+                'Commande non payée',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.screenTitle.copyWith(fontSize: 19),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'La commande ${order.code} ($tableLabel) a été livrée. '
+                    'Confirmez le paiement en espèces pour débloquer l’application du client.',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.body.copyWith(
+                      color: AppColors.gray,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.warmBeige.withValues(alpha: 0.45),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Text(
+                      'Le client sera débloqué automatiquement après votre confirmation.',
+                      style: AppTextStyles.chip.copyWith(fontSize: 12),
+                    ),
+                  ),
+                  if (error != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      error!,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.burgundy,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: busy
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(false),
+                  child: const Text('Plus tard'),
+                ),
+                FilledButton.icon(
+                  onPressed: busy
+                      ? null
+                      : () async {
+                          setDialogState(() {
+                            busy = true;
+                            error = null;
+                          });
+                          try {
+                            await dialogContext
+                                .read<OrdersProvider>()
+                                .confirmPayment(order.id);
+                            if (dialogContext.mounted) {
+                              Navigator.of(dialogContext).pop(true);
+                            }
+                          } catch (_) {
+                            if (dialogContext.mounted) {
+                              setDialogState(() {
+                                busy = false;
+                                error = 'Erreur lors de l’enregistrement du paiement.';
+                              });
+                            }
+                          }
+                        },
+                  icon: busy
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.payments_outlined),
+                  label: const Text('Confirmer le paiement'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.forestGreen,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final order = context.watch<OrdersProvider>().byId(widget.orderId);
+    if (order != null) _maybePromptPayment(order);
 
     return Scaffold(
       body: SafeArea(
@@ -154,34 +290,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Divider(color: AppColors.border, height: 1),
+                Divider(color: AppColors.border, height: 1),
                 const SizedBox(height: 14),
-                if (order.vatPercent > 0) ...[
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text('Sous-total', style: AppTextStyles.body),
-                      ),
-                      Text(
-                        Formatters.dt(order.subtotal),
-                        style: AppTextStyles.body,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'TVA (${order.vatPercent.toStringAsFixed(order.vatPercent == order.vatPercent.roundToDouble() ? 0 : 1)}%)',
-                          style: AppTextStyles.body,
-                        ),
-                      ),
-                      Text(Formatters.dt(order.vat), style: AppTextStyles.body),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                ],
                 Row(
                   children: [
                     Expanded(child: Text('Total', style: AppTextStyles.body)),
@@ -221,6 +331,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 ),
                 const SizedBox(height: 10),
               ],
+              PaymentSection(order: order),
               if (actionLabel != null) ...[
                 SizedBox(
                   width: double.infinity,

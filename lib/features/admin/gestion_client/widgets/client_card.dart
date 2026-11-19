@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/formatters.dart';
@@ -18,8 +19,10 @@ class ClientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtle =
-        AppTextStyles.chip.copyWith(color: AppColors.gray, fontSize: 12);
+    final subtle = AppTextStyles.chip.copyWith(
+      color: AppColors.gray,
+      fontSize: 12,
+    );
 
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 12, 6, 12),
@@ -40,12 +43,15 @@ class ClientCard extends StatelessWidget {
           Container(
             width: 52,
             height: 52,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.chipBackground,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.person_rounded,
-                size: 30, color: AppColors.gray),
+            child: const Icon(
+              Icons.person_rounded,
+              size: 30,
+              color: AppColors.gray,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(

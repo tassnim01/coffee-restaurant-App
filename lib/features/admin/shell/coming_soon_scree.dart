@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -27,7 +28,9 @@ class ComingSoonScreen extends StatelessWidget {
                     onPressed: onMenuTap,
                     icon: const Icon(Icons.menu_rounded, size: 28),
                   ),
-                  Expanded(child: Text(title, style: AppTextStyles.screenTitle)),
+                  Expanded(
+                    child: Text(title, style: AppTextStyles.screenTitle),
+                  ),
                 ],
               ),
             ),
@@ -36,13 +39,15 @@ class ComingSoonScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.construction_rounded,
-                        size: 46, color: AppColors.gray),
+                    const Icon(
+                      Icons.construction_rounded,
+                      size: 46,
+                      color: AppColors.gray,
+                    ),
                     const SizedBox(height: 10),
                     Text(
                       'Ce module arrive bientôt',
-                      style:
-                          AppTextStyles.body.copyWith(color: AppColors.gray),
+                      style: AppTextStyles.body.copyWith(color: AppColors.gray),
                     ),
                   ],
                 ),

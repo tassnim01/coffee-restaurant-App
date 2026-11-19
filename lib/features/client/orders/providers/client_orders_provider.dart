@@ -64,7 +64,6 @@ class ClientOrdersProvider extends ChangeNotifier {
   Future<RestaurantOrder> placeOrder({
     required AppUser user,
     required List<CartItem> items,
-    required double vatPercent,
   }) {
     final orderItems = items
         .map(
@@ -88,7 +87,6 @@ class ClientOrdersProvider extends ChangeNotifier {
       clientPhone: user.phone,
       tableNumber: user.tableNumber ?? '',
       items: orderItems,
-      vatPercent: vatPercent,
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -26,7 +27,11 @@ class ClientBottomNav extends StatelessWidget {
 
   static const _items = <_NavItem>[
     _NavItem(Icons.home_outlined, Icons.home_rounded, 'Accueil'),
-    _NavItem(Icons.restaurant_menu_outlined, Icons.restaurant_menu_rounded, 'Menu'),
+    _NavItem(
+      Icons.restaurant_menu_outlined,
+      Icons.restaurant_menu_rounded,
+      'Menu',
+    ),
     _NavItem(Icons.shopping_bag_outlined, Icons.shopping_bag_rounded, 'Panier'),
     _NavItem(Icons.person_outline_rounded, Icons.person_rounded, 'Compte'),
   ];
@@ -34,7 +39,7 @@ class ClientBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
@@ -46,7 +51,9 @@ class ClientBottomNav extends StatelessWidget {
             children: List.generate(_items.length, (i) {
               final item = _items[i];
               final selected = i == currentIndex;
-              final color = selected ? AppColors.forestGreen : AppColors.gray;
+              final color = selected
+                  ? AppColors.brandForeground
+                  : AppColors.gray;
               return Expanded(
                 child: InkWell(
                   onTap: () => onTap(i),
@@ -59,8 +66,11 @@ class ClientBottomNav extends StatelessWidget {
                         Stack(
                           clipBehavior: Clip.none,
                           children: [
-                            Icon(selected ? item.activeIcon : item.icon,
-                                color: color, size: 25),
+                            Icon(
+                              selected ? item.activeIcon : item.icon,
+                              color: color,
+                              size: 25,
+                            ),
                             if (i == _cartIndex && cartCount > 0)
                               Positioned(
                                 right: -9,
@@ -75,8 +85,9 @@ class ClientBottomNav extends StatelessWidget {
                           style: AppTextStyles.chip.copyWith(
                             fontSize: 11.5,
                             color: color,
-                            fontWeight:
-                                selected ? FontWeight.w700 : FontWeight.w500,
+                            fontWeight: selected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
                           ),
                         ),
                       ],

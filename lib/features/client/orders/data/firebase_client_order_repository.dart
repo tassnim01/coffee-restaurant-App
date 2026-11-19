@@ -44,7 +44,6 @@ class FirebaseClientOrderRepository implements ClientOrderRepository {
     required String clientPhone,
     required String tableNumber,
     required List<OrderItem> items,
-    required double vatPercent,
   }) async {
     final counterRef = _db.collection('settings').doc('counters');
     final orderRef = _orders.doc();
@@ -66,7 +65,6 @@ class FirebaseClientOrderRepository implements ClientOrderRepository {
         items: items,
         status: OrderStatus.pending,
         createdAt: DateTime.now(),
-        vatPercent: vatPercent,
       );
       final pdf = await OrderInvoiceGenerator.generate(order);
       final encodedPdf = base64Encode(pdf);
@@ -135,8 +133,9 @@ class FirebaseClientOrderRepository implements ClientOrderRepository {
       transaction.update(orderRef, {
         'items': items.map((item) => item.toMap()).toList(),
         'subtotal': updatedOrder.subtotal,
-        'vat': updatedOrder.vat,
         'total': updatedOrder.total,
+        'vat': FieldValue.delete(),
+        'vatPercent': FieldValue.delete(),
         'invoicePdfBase64': encodedPdf,
         'updatedAt': FieldValue.serverTimestamp(),
       });

@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+
 import '../../../../core/utils/formatters.dart';
 import '../data/client_repository.dart';
 import '../models/restaurant_client.dart';

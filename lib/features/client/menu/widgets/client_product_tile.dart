@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/product_image.dart';
@@ -58,8 +59,10 @@ class ClientProductTile extends StatelessWidget {
                         product.description,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.chip
-                            .copyWith(color: AppColors.gray, fontSize: 12),
+                        style: AppTextStyles.chip.copyWith(
+                          color: AppColors.gray,
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 5),
                       Text(
@@ -83,8 +86,11 @@ class ClientProductTile extends StatelessWidget {
                       color: AppColors.forestGreen,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.add_rounded,
-                        color: Colors.white, size: 22),
+                    child: const Icon(
+                      Icons.add_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                   ),
                 ),
               ],

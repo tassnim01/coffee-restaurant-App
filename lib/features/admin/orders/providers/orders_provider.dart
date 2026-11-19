@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+
 import '../data/order_repository.dart';
 import '../models/order_status.dart';
 import '../models/restaurant_order.dart';
@@ -51,13 +53,11 @@ class OrdersProvider extends ChangeNotifier {
     return null;
   }
 
-  List<RestaurantOrder> filtered({
-    required OrderTab tab,
-    String query = '',
-  }) {
+  List<RestaurantOrder> filtered({required OrderTab tab, String query = ''}) {
     final q = query.trim().toLowerCase();
     return _orders.where((o) {
-      final matchesQuery = q.isEmpty ||
+      final matchesQuery =
+          q.isEmpty ||
           o.code.toLowerCase().contains(q) ||
           o.number.toString().contains(q) ||
           o.clientName.toLowerCase().contains(q);
@@ -75,5 +75,10 @@ class OrdersProvider extends ChangeNotifier {
   void dispose() {
     _subscription?.cancel();
     super.dispose();
+  }
+
+  /// Le responsable confirme le paiement en espèces d'une commande livrée.
+  Future<void> confirmPayment(String orderId) {
+    return _repository.confirmPayment(orderId);
   }
 }

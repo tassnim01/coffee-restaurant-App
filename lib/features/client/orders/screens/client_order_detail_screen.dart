@@ -162,12 +162,8 @@ class ClientOrderDetailScreen extends StatelessWidget {
           const SizedBox(height: 10),
           ...order.items.map(_itemRow),
           const SizedBox(height: 8),
-          const Divider(color: AppColors.border, height: 1),
+          Divider(color: AppColors.border, height: 1),
           const SizedBox(height: 12),
-          _totalRow('Sous-total', money(order.subtotal)),
-          if (order.vatPercent > 0)
-            _totalRow('TVA (${percent(order.vatPercent)}%)', money(order.vat)),
-          const SizedBox(height: 4),
           _totalRow('Total', money(order.total), big: true),
           const SizedBox(height: 6),
           Align(
@@ -440,9 +436,7 @@ class _EditPendingOrderSheetState extends State<_EditPendingOrderSheet> {
         const SizedBox(height: 14),
         Row(
           children: [
-            Expanded(
-              child: Text('Total (hors TVA)', style: AppTextStyles.body),
-            ),
+            Expanded(child: Text('Total', style: AppTextStyles.body)),
             Text(money(_total), style: AppTextStyles.productName),
           ],
         ),

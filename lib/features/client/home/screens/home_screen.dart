@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/category_icons.dart';
@@ -67,8 +68,11 @@ class HomeScreen extends StatelessWidget {
   Widget _buildLocationRow() {
     return Row(
       children: [
-        const Icon(Icons.location_on_outlined,
-            color: AppColors.warmBeige, size: 24),
+        const Icon(
+          Icons.location_on_outlined,
+          color: AppColors.warmBeige,
+          size: 24,
+        ),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -76,8 +80,10 @@ class HomeScreen extends StatelessWidget {
             children: [
               Text(
                 'Restaurant',
-                style: AppTextStyles.chip
-                    .copyWith(color: AppColors.gray, fontSize: 11.5),
+                style: AppTextStyles.chip.copyWith(
+                  color: AppColors.gray,
+                  fontSize: 11.5,
+                ),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -91,8 +97,11 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 2),
-                  const Icon(Icons.keyboard_arrow_down_rounded,
-                      color: Colors.white, size: 18),
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                 ],
               ),
             ],
@@ -105,8 +114,11 @@ class HomeScreen extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white24),
           ),
-          child: const Icon(Icons.notifications_none_rounded,
-              color: Colors.white, size: 22),
+          child: const Icon(
+            Icons.notifications_none_rounded,
+            color: Colors.white,
+            size: 22,
+          ),
         ),
       ],
     );
@@ -123,8 +135,7 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
-              const Icon(Icons.search_rounded,
-                  color: AppColors.gray, size: 22),
+              const Icon(Icons.search_rounded, color: AppColors.gray, size: 22),
               const SizedBox(width: 12),
               Text('Rechercher un plat...', style: AppTextStyles.hint),
             ],
@@ -196,18 +207,25 @@ class HomeScreen extends StatelessWidget {
               Container(
                 width: 64,
                 height: 64,
-                decoration:
-                    BoxDecoration(color: style.bg, shape: BoxShape.circle),
-                child: Icon(CategoryIcons.byKey(c.iconKey),
-                    color: style.fg, size: 28),
+                decoration: BoxDecoration(
+                  color: style.bg,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  CategoryIcons.byKey(c.iconKey),
+                  color: style.fg,
+                  size: 28,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 c.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.chip
-                    .copyWith(fontSize: 12.5, fontWeight: FontWeight.w600),
+                style: AppTextStyles.chip.copyWith(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -230,7 +248,7 @@ class HomeScreen extends StatelessWidget {
                 'assets/images/promo_banner.jpg',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) =>
-                    const ColoredBox(color: AppColors.chipBackground),
+                    ColoredBox(color: AppColors.chipBackground),
               ),
               // Dégradé sombre à gauche pour lire le texte.
               const DecoratedBox(
@@ -276,7 +294,7 @@ class HomeScreen extends StatelessWidget {
           asset,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) =>
-              const ColoredBox(color: AppColors.chipBackground),
+              ColoredBox(color: AppColors.chipBackground),
         ),
       ),
     );

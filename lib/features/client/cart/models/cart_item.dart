@@ -23,15 +23,14 @@ class CartItem {
     Product p, {
     List<Supplement> supplements = const [],
     int quantity = 1,
-  }) =>
-      CartItem(
-        productId: p.id,
-        name: p.name,
-        imageUrl: p.imageUrl,
-        unitPrice: p.price,
-        supplements: List.unmodifiable(supplements),
-        quantity: quantity,
-      );
+  }) => CartItem(
+    productId: p.id,
+    name: p.name,
+    imageUrl: p.imageUrl,
+    unitPrice: p.price,
+    supplements: List.unmodifiable(supplements),
+    quantity: quantity,
+  );
 
   /// Deux lignes avec le même produit et les mêmes suppléments sont fusionnées.
   String get key {

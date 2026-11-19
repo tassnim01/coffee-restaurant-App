@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../../../admin/menu/models/product.dart';
 import '../../../admin/menu/models/supplement.dart';
 import '../models/cart_item.dart';
@@ -13,11 +14,6 @@ class CartProvider extends ChangeNotifier {
   int get itemCount => _items.fold(0, (sum, i) => sum + i.quantity);
 
   double get subtotal => _items.fold(0.0, (sum, i) => sum + i.lineTotal);
-
-  /// TVA pour un taux donné en pourcentage (13 = 13 %).
-  double vatFor(double percent) => subtotal * percent / 100;
-
-  double totalFor(double percent) => subtotal + vatFor(percent);
 
   void add(
     Product product, {

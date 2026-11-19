@@ -1,12 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../dashboard/screens/dashboard_screen.dart';
 import '../gestion_client/screens/clients_screen.dart';
 import '../menu/screens/menu_management_screen.dart';
 import '../orders/screens/orders_screen.dart';
-import '../settings/screens/settings_screen.dart';
+import '../settings/screens/admin_settings_screen.dart';
 import 'admin_drawer.dart';
 import 'coming_soon_scree.dart';
+import '../../payment/screens/payments_screen.dart';
 
 /// Conteneur de l'espace responsable : menu latéral + pages.
 class AdminShell extends StatefulWidget {
@@ -27,17 +29,18 @@ class _AdminShellState extends State<AdminShell> {
     setState(() => _index = index);
   }
 
-  void _logout() {
+  Future<void> _logout() async {
     _scaffoldKey.currentState?.closeDrawer();
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text(
-            "La déconnexion sera disponible avec l'authentification.",
-          ),
-        ),
-      );
+    try {
+      await FirebaseAuth.instance.signOut();
+    } on FirebaseAuthException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Impossible de fermer la session.')),
+        );
+    }
   }
 
   @override
@@ -61,8 +64,8 @@ class _AdminShellState extends State<AdminShell> {
           ComingSoonScreen(title: 'Statistiques', onMenuTap: _openDrawer),
           MenuManagementScreen(onMenuTap: _openDrawer),
           ClientsScreen(onMenuTap: _openDrawer),
-          ComingSoonScreen(title: 'Paiements', onMenuTap: _openDrawer),
-          SettingsScreen(onMenuTap: _openDrawer),
+          PaymentsScreen(onMenuTap: _openDrawer),
+          AdminSettingsScreen(onMenuTap: _openDrawer),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
@@ -30,8 +31,10 @@ class StatCard extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.chip
-                .copyWith(color: Colors.white70, fontSize: 12),
+            style: AppTextStyles.chip.copyWith(
+              color: Colors.white70,
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 10),
           Row(
@@ -42,8 +45,10 @@ class StatCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   child: Text(
                     value,
-                    style: AppTextStyles.screenTitle
-                        .copyWith(color: Colors.white, fontSize: 24),
+                    style: AppTextStyles.screenTitle.copyWith(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
                   ),
                 ),
               ),

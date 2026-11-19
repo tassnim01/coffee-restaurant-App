@@ -99,14 +99,14 @@ class AdminProductCard extends StatelessWidget {
                 children: [
                   _ActionIcon(
                     icon: Icons.visibility_outlined,
-                    color: AppColors.black,
+                    color: AppColors.textPrimary,
                     tooltip: 'Voir',
                     onTap: onView,
                   ),
                   const SizedBox(width: 4),
                   _ActionIcon(
                     icon: Icons.edit_outlined,
-                    color: AppColors.black,
+                    color: AppColors.textPrimary,
                     tooltip: 'Modifier',
                     onTap: onEdit,
                   ),

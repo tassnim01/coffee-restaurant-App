@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/category_icons.dart';
@@ -64,8 +65,9 @@ class _ClientMenuScreenState extends State<ClientMenuScreen> {
 
     // Ignore la catégorie sélectionnée si elle a été supprimée entre-temps.
     final selected = widget.categoryFilter.value;
-    final categoryId =
-        menu.categories.any((c) => c.id == selected) ? selected : null;
+    final categoryId = menu.categories.any((c) => c.id == selected)
+        ? selected
+        : null;
 
     return Scaffold(
       body: SafeArea(
@@ -137,7 +139,8 @@ class _ClientMenuScreenState extends State<ClientMenuScreen> {
             FilledButton(
               onPressed: menu.loadMenu,
               style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.forestGreen),
+                backgroundColor: AppColors.forestGreen,
+              ),
               child: Text('Réessayer', style: AppTextStyles.button),
             ),
           ],
@@ -152,11 +155,16 @@ class _ClientMenuScreenState extends State<ClientMenuScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.restaurant_outlined,
-                size: 46, color: AppColors.gray),
+            const Icon(
+              Icons.restaurant_outlined,
+              size: 46,
+              color: AppColors.gray,
+            ),
             const SizedBox(height: 10),
-            Text('Aucun plat trouvé',
-                style: AppTextStyles.body.copyWith(color: AppColors.gray)),
+            Text(
+              'Aucun plat trouvé',
+              style: AppTextStyles.body.copyWith(color: AppColors.gray),
+            ),
           ],
         ),
       );
@@ -172,7 +180,7 @@ class _ClientMenuScreenState extends State<ClientMenuScreen> {
         separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, i) {
           final product = products[i];
-                    return ClientProductTile(
+          return ClientProductTile(
             product: product,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(

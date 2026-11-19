@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/formatters.dart';
@@ -68,8 +69,10 @@ class DashboardScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: Text('Voir toutes les commandes',
-                        style: AppTextStyles.button),
+                    child: Text(
+                      'Voir toutes les commandes',
+                      style: AppTextStyles.button,
+                    ),
                   ),
                 ),
               ),
@@ -86,9 +89,7 @@ class DashboardScreen extends StatelessWidget {
         IconButton(
           onPressed: onMenuTap ?? () => Navigator.of(context).maybePop(),
           icon: Icon(
-            onMenuTap != null
-                ? Icons.menu_rounded
-                : Icons.chevron_left_rounded,
+            onMenuTap != null ? Icons.menu_rounded : Icons.chevron_left_rounded,
             size: 28,
           ),
           padding: EdgeInsets.zero,
@@ -125,17 +126,17 @@ class DashboardScreen extends StatelessWidget {
   }
 
   BoxDecoration get _cardDecoration => BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      );
+    color: AppColors.surface,
+    borderRadius: BorderRadius.circular(18),
+    border: Border.all(color: AppColors.border),
+    boxShadow: [
+      BoxShadow(
+        color: AppColors.black.withValues(alpha: 0.04),
+        blurRadius: 10,
+        offset: const Offset(0, 3),
+      ),
+    ],
+  );
 
   Widget _buildStatusCard(DashboardStats stats) {
     final entries = [
@@ -178,13 +179,16 @@ class DashboardScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: Text(entries[i].$1,
-                                  style: AppTextStyles.body),
+                              child: Text(
+                                entries[i].$1,
+                                style: AppTextStyles.body,
+                              ),
                             ),
                             Text(
                               '${entries[i].$2}',
-                              style: AppTextStyles.productName
-                                  .copyWith(fontSize: 15),
+                              style: AppTextStyles.productName.copyWith(
+                                fontSize: 15,
+                              ),
                             ),
                           ],
                         ),
@@ -244,8 +248,9 @@ class DashboardScreen extends StatelessWidget {
         child: Row(
           children: [
             ProductThumb(
-              productId:
-                  order.items.isEmpty ? null : order.items.first.productId,
+              productId: order.items.isEmpty
+                  ? null
+                  : order.items.first.productId,
               imageUrl: order.coverImage,
               size: 44,
               radius: 12,
@@ -255,12 +260,16 @@ class DashboardScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(order.code,
-                      style: AppTextStyles.productName.copyWith(fontSize: 13.5)),
+                  Text(
+                    order.code,
+                    style: AppTextStyles.productName.copyWith(fontSize: 13.5),
+                  ),
                   Text(
                     Formatters.time(order.createdAt),
-                    style: AppTextStyles.chip
-                        .copyWith(color: AppColors.gray, fontSize: 11.5),
+                    style: AppTextStyles.chip.copyWith(
+                      color: AppColors.gray,
+                      fontSize: 11.5,
+                    ),
                   ),
                 ],
               ),

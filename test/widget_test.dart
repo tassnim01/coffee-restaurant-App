@@ -16,6 +16,10 @@ import 'package:projet_test/features/admin/orders/data/order_repository.dart';
 import 'package:projet_test/features/admin/orders/models/order_status.dart';
 import 'package:projet_test/features/admin/orders/models/restaurant_order.dart';
 import 'package:projet_test/features/admin/gestion_client/models/restaurant_client.dart';
+import 'package:projet_test/features/auth/data/auth_repository.dart';
+import 'package:projet_test/features/auth/models/app_user.dart';
+import 'package:projet_test/features/client/orders/data/client_order_repository.dart';
+import 'package:projet_test/features/admin/orders/models/order_item.dart';
 
 void main() {
   testWidgets('client can open welcome, home, and menu screens', (
@@ -26,19 +30,19 @@ void main() {
         menuRepository: _FakeMenuRepository(),
         orderRepository: _FakeOrderRepository(),
         clientRepository: _FakeClientRepository(),
+        authRepository: _FakeAuthRepository(),
+        clientOrderRepository: _FakeClientOrderRepository(),
+        startAsClient: true,
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Good Food\nGood Mood'), findsOneWidget);
+    expect(find.text('Commencer'), findsOneWidget);
     await tester.tap(find.text('Commencer'));
     await tester.pumpAndSettle();
 
     expect(find.text('Catégories'), findsOneWidget);
-    await tester.tap(find.text('Voir tout'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Menu'), findsNWidgets(2));
+    expect(find.text('Menu'), findsOneWidget);
   });
 }
 
@@ -75,6 +79,9 @@ class _FakeOrderRepository implements OrderRepository {
   @override
   Future<void> updateStatus(String orderId, OrderStatus status) =>
       throw UnimplementedError();
+
+  @override
+  Future<void> confirmPayment(String orderId) => throw UnimplementedError();
 }
 
 class _FakeClientRepository implements ClientRepository {
@@ -90,4 +97,63 @@ class _FakeClientRepository implements ClientRepository {
 
   @override
   Future<void> deleteClient(String clientId) => throw UnimplementedError();
+}
+
+class _FakeAuthRepository implements AuthRepository {
+  @override
+  Stream<String?> authStateChanges() => Stream.value(null);
+
+  @override
+  Future<AppUser> register({
+    required String name,
+    required String phone,
+    required String email,
+    required String password,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<AppUser> login({required String email, required String password}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<AppUser?> loadProfile(String uid) async => null;
+
+  @override
+  Future<AppUser> updateProfile({
+    required AppUser user,
+    required String name,
+    required String phone,
+    required String email,
+    String? currentPassword,
+    String? newPassword,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<void> deleteAccount({required String password}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> logout() async {}
+}
+
+class _FakeClientOrderRepository implements ClientOrderRepository {
+  @override
+  Stream<List<RestaurantOrder>> watchOrdersOf(String userId) =>
+      Stream.value([]);
+
+  @override
+  Future<RestaurantOrder> createOrder({
+    required String userId,
+    required String clientName,
+    required String clientPhone,
+    required String tableNumber,
+    required List<OrderItem> items,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<void> updatePendingOrder({
+    required String userId,
+    required String orderId,
+    required List<OrderItem> items,
+  }) => throw UnimplementedError();
 }

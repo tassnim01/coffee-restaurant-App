@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../models/category.dart';
 import '../models/product.dart';
 import 'menu_repository.dart';
@@ -10,7 +11,7 @@ class FirebaseMenuRepository implements MenuRepository {
   final FirebaseFirestore _db;
 
   FirebaseMenuRepository({FirebaseFirestore? firestore})
-      : _db = firestore ?? FirebaseFirestore.instance;
+    : _db = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> get _categories =>
       _db.collection('categories');

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/formatters.dart';
@@ -21,7 +22,8 @@ Future<RestaurantClient?> showClientFormSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (_) => _ClientFormSheet(client: client, isPhoneTaken: isPhoneTaken),
+    builder: (_) =>
+        _ClientFormSheet(client: client, isPhoneTaken: isPhoneTaken),
   );
 }
 

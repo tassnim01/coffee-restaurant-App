@@ -77,7 +77,7 @@ class ProductImage extends StatelessWidget {
               height: 18,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
-          : const Icon(Icons.local_cafe_outlined, color: AppColors.gray),
+          : Icon(Icons.local_cafe_outlined, color: AppColors.gray),
     );
   }
 }

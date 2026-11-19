@@ -12,7 +12,6 @@ abstract class ClientOrderRepository {
     required String clientPhone,
     required String tableNumber,
     required List<OrderItem> items,
-    required double vatPercent,
   });
 
   /// Remplace les articles d'une commande uniquement si elle est en attente.

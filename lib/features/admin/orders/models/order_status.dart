@@ -105,7 +105,7 @@ extension OrderStatusX on OrderStatus {
       case OrderStatus.pending:
         return AppColors.warmBeige.withValues(alpha: 0.75);
       case OrderStatus.received:
-        return AppColors.burgundy.withValues(alpha: 0.12);
+        return AppColors.danger.withValues(alpha: 0.14);
       case OrderStatus.preparing:
         return AppColors.warmBeige.withValues(alpha: 0.75);
       case OrderStatus.ready:
@@ -120,13 +120,13 @@ extension OrderStatusX on OrderStatus {
       case OrderStatus.pending:
         return AppColors.textPrimary;
       case OrderStatus.received:
-        return AppColors.burgundy;
+        return AppColors.danger;
       case OrderStatus.preparing:
         return AppColors.textPrimary;
       case OrderStatus.ready:
-        return AppColors.forestGreen;
+        return AppColors.brandForeground;
       case OrderStatus.delivered:
-        return const Color(0xFF5E5E63);
+        return AppColors.gray;
     }
   }
 }

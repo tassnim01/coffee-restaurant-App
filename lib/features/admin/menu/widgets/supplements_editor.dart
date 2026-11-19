@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_text_field.dart';
@@ -9,8 +10,8 @@ class _Row {
   final TextEditingController name;
   final TextEditingController price;
   _Row(String n, String p)
-      : name = TextEditingController(text: n),
-        price = TextEditingController(text: p);
+    : name = TextEditingController(text: n),
+      price = TextEditingController(text: p);
 
   void dispose() {
     name.dispose();
@@ -101,8 +102,9 @@ class _SupplementsEditorState extends State<SupplementsEditor> {
                   child: TextField(
                     controller: _rows[i].price,
                     style: AppTextStyles.body,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                     ],
@@ -113,8 +115,11 @@ class _SupplementsEditorState extends State<SupplementsEditor> {
                 IconButton(
                   onPressed: () => _remove(i),
                   tooltip: 'Retirer',
-                  icon: const Icon(Icons.delete_outline_rounded,
-                      color: AppColors.burgundy, size: 21),
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: AppColors.burgundy,
+                    size: 21,
+                  ),
                 ),
               ],
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../models/order_status.dart';
@@ -32,8 +33,10 @@ class OrderTrackingScreen extends StatelessWidget {
                       children: [
                         IconButton(
                           onPressed: () => Navigator.of(context).maybePop(),
-                          icon: const Icon(Icons.chevron_left_rounded,
-                              size: 28),
+                          icon: const Icon(
+                            Icons.chevron_left_rounded,
+                            size: 28,
+                          ),
                         ),
                         Expanded(
                           child: Text(
@@ -59,8 +62,9 @@ class OrderTrackingScreen extends StatelessWidget {
                               width: 150,
                               height: 150,
                               decoration: BoxDecoration(
-                                color: AppColors.forestGreen
-                                    .withValues(alpha: 0.1),
+                                color: AppColors.forestGreen.withValues(
+                                  alpha: 0.1,
+                                ),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -73,15 +77,18 @@ class OrderTrackingScreen extends StatelessWidget {
                             Text(
                               order.status.trackingTitle,
                               textAlign: TextAlign.center,
-                              style: AppTextStyles.productName
-                                  .copyWith(fontSize: 16),
+                              style: AppTextStyles.productName.copyWith(
+                                fontSize: 16,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               order.status.trackingSubtitle,
                               textAlign: TextAlign.center,
                               style: AppTextStyles.chip.copyWith(
-                                  color: AppColors.gray, fontSize: 12.5),
+                                color: AppColors.gray,
+                                fontSize: 12.5,
+                              ),
                             ),
                           ],
                         ),
@@ -101,8 +108,10 @@ class OrderTrackingScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        child: Text('Voir les articles',
-                            style: AppTextStyles.button),
+                        child: Text(
+                          'Voir les articles',
+                          style: AppTextStyles.button,
+                        ),
                       ),
                     ),
                   ),

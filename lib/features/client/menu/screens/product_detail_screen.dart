@@ -134,7 +134,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -184,7 +184,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   v == true ? _selected.add(index) : _selected.remove(index);
                 }),
                 activeColor: AppColors.forestGreen,
-                side: const BorderSide(color: AppColors.gray, width: 1.4),
+                side: BorderSide(color: AppColors.gray, width: 1.4),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
                 ),
@@ -281,7 +281,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         height: 32,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: AppColors.black, width: 1.3),
+          border: Border.all(color: AppColors.border, width: 1.3),
         ),
         child: Icon(icon, size: 18),
       ),

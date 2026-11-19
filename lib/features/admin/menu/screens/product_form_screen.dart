@@ -1,8 +1,10 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_text_field.dart';
@@ -137,8 +139,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   Widget build(BuildContext context) {
     final categories = context.watch<MenuProvider>().categories;
     // Évite une erreur si la catégorie du produit n'existe plus.
-    final validCategoryId =
-        categories.any((c) => c.id == _categoryId) ? _categoryId : null;
+    final validCategoryId = categories.any((c) => c.id == _categoryId)
+        ? _categoryId
+        : null;
 
     return Scaffold(
       body: SafeArea(
@@ -189,13 +192,16 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         icon: const Icon(Icons.keyboard_arrow_down_rounded),
                         dropdownColor: AppColors.surface,
                         borderRadius: BorderRadius.circular(14),
-                        decoration:
-                            appInputDecoration(hint: 'Sélectionner une catégorie'),
+                        decoration: appInputDecoration(
+                          hint: 'Sélectionner une catégorie',
+                        ),
                         items: categories
-                            .map((c) => DropdownMenuItem(
-                                  value: c.id,
-                                  child: Text(c.name),
-                                ))
+                            .map(
+                              (c) => DropdownMenuItem(
+                                value: c.id,
+                                child: Text(c.name),
+                              ),
+                            )
                             .toList(),
                         onChanged: (v) => setState(() => _categoryId = v),
                         validator: (v) =>
@@ -218,13 +224,15 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         controller: _priceCtrl,
                         hint: 'Ex. 6.500',
                         keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
+                          decimal: true,
+                        ),
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                         ],
                         validator: (v) {
-                          final value =
-                              double.tryParse((v ?? '').trim().replaceAll(',', '.'));
+                          final value = double.tryParse(
+                            (v ?? '').trim().replaceAll(',', '.'),
+                          );
                           if (value == null || value <= 0) {
                             return 'Entrez un prix valide';
                           }
@@ -261,13 +269,16 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         )
                       : const Icon(Icons.save_outlined, color: Colors.white),
                   label: Text(
-                    _isEdit ? 'Enregistrer les modifications' : 'Ajouter le produit',
+                    _isEdit
+                        ? 'Enregistrer les modifications'
+                        : 'Ajouter le produit',
                     style: AppTextStyles.button,
                   ),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.forestGreen,
-                    disabledBackgroundColor:
-                        AppColors.forestGreen.withValues(alpha: 0.6),
+                    disabledBackgroundColor: AppColors.forestGreen.withValues(
+                      alpha: 0.6,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -303,8 +314,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.background, width: 2),
                   ),
-                  child: const Icon(Icons.edit_outlined,
-                      size: 17, color: Colors.white),
+                  child: const Icon(
+                    Icons.edit_outlined,
+                    size: 17,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
@@ -332,12 +346,15 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 Container(
                   width: 54,
                   height: 54,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.border,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.photo_camera_outlined,
-                      color: AppColors.gray, size: 26),
+                  child: const Icon(
+                    Icons.photo_camera_outlined,
+                    color: AppColors.gray,
+                    size: 26,
+                  ),
                 ),
                 Positioned(
                   right: -2,
@@ -349,8 +366,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       color: AppColors.forestGreen,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.add_rounded,
-                        size: 14, color: Colors.white),
+                    child: const Icon(
+                      Icons.add_rounded,
+                      size: 14,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],

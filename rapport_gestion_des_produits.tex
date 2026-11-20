@@ -1,0 +1,701 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+
+\definecolor{codeblue}{RGB}{0,92,170}
+\definecolor{codegray}{RGB}{95,95,95}
+\definecolor{codegreen}{RGB}{0,128,0}
+\definecolor{backgray}{RGB}{247,247,247}
+\definecolor{titlegreen}{RGB}{35,92,71}
+
+\lstdefinestyle{dartstyle}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codeblue}\bfseries,
+  commentstyle=\color{codegray}\itshape,
+  stringstyle=\color{codegreen},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{codegray},
+  backgroundcolor=\color{backgray},
+  numbers=left,
+  numberstyle=\tiny\color{codegray},
+  numbersep=8pt,
+  captionpos=b,
+  tabsize=2
+}
+\lstset{style=dartstyle}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=titlegreen,
+  urlcolor=codeblue,
+  pdftitle={Rapport - Gestion des Produits}
+}
+
+\renewcommand{\chaptername}{Chapitre}
+\renewcommand{\contentsname}{Table des matières}
+
+\begin{document}
+
+% ===================== Page de garde =====================
+\begin{titlepage}
+\centering
+
+\vspace*{0.5cm}
+\textbf{\Large [NOM DE L'ÉTABLISSEMENT]}\\[0.2cm]
+\textbf{[Filière / Département]}\\[1.2cm]
+
+\rule{\textwidth}{0.8pt}\\[0.7cm]
+{\fontsize{28}{34}\selectfont
+\textbf{Rapport de Projet}\\[0.3cm]
+}
+{\Large Application Mobile de Gestion d'un Coffee-Restaurant}\\[0.7cm]
+\rule{\textwidth}{0.8pt}
+
+\vspace{1.5cm}
+
+\begin{tikzpicture}
+\node[draw=titlegreen, very thick, rounded corners=8pt,
+      minimum width=11cm, minimum height=2.2cm, align=center,
+      fill=titlegreen!5]
+{\Huge\bfseries Gestion des Produits};
+\end{tikzpicture}
+
+\vfill
+
+\begin{minipage}[t]{0.48\textwidth}
+\textbf{Réalisé par :}\\
+[Nom et prénom]\\
+[Classe / Groupe]
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\textbf{Encadré par :}\\
+[Nom de l'encadrant]
+\end{minipage}
+
+\vfill
+\textbf{Année universitaire : 2025--2026}
+\end{titlepage}
+
+% ===================== Remerciements =====================
+\chapter*{Remerciements}
+\addcontentsline{toc}{chapter}{Remerciements}
+
+Je tiens à remercier toute personne ayant contribué à la réalisation de ce projet.
+Je remercie particulièrement [Nom de l'encadrant] pour son encadrement, ses conseils
+et son accompagnement tout au long du travail.
+
+Je remercie également les enseignants, les responsables de l'établissement ainsi que
+mes camarades pour les échanges techniques qui ont permis d'améliorer la qualité de
+ce travail.
+
+Enfin, je remercie ma famille pour son soutien, sa patience et ses encouragements.
+
+% ===================== Résumé =====================
+\chapter*{Résumé}
+\addcontentsline{toc}{chapter}{Résumé}
+
+Ce rapport présente la conception et la réalisation du module de gestion des produits
+au sein d'une application mobile Flutter pour un coffee-restaurant. Ce module permet
+à l'administrateur d'ajouter, consulter, modifier et supprimer les produits du menu.
+Il offre aussi la gestion des catégories, des suppléments, des prix en dinars tunisiens
+(DT), des images et de la disponibilité.
+
+Le projet repose sur une architecture organisée en trois niveaux : les modèles
+de données, les fournisseurs utilisant \texttt{Provider} pour la gestion d'état,
+et les dépôts de données basés sur Firebase Cloud Firestore. L'application met en œuvre
+les opérations CRUD, la validation des formulaires, le filtrage, la recherche et
+la synchronisation des données avec la base distante.
+
+\textbf{Mots-clés :} Flutter, Dart, Firebase, Cloud Firestore, CRUD, Provider,
+gestion de produits.
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+% ===================== Introduction =====================
+\chapter{Introduction générale}
+
+\section{Contexte du projet}
+
+La digitalisation des établissements de restauration permet d'améliorer la gestion
+des commandes, du menu et de la relation avec les clients. Dans une application de
+coffee-restaurant, le catalogue des produits constitue une donnée centrale : les
+produits sont présentés aux clients, associés à des catégories et affectés à des
+suppléments optionnels.
+
+L'application réalisée avec Flutter utilise Firebase pour centraliser les données
+et proposer une application multi-plateformes. Le responsable peut gérer les produits
+à partir d'un espace administrateur, tandis que les clients peuvent consulter le menu.
+
+\section{Objectifs du module}
+
+Les objectifs principaux du module de gestion des produits sont :
+\begin{itemize}[label=\textbullet]
+  \item centraliser les informations du menu ;
+  \item permettre l'ajout et la modification d'un produit ;
+  \item supprimer un produit après confirmation ;
+  \item consulter les caractéristiques détaillées d'un produit ;
+  \item changer rapidement son état de disponibilité ;
+  \item rechercher un produit ou filtrer les produits par catégorie ;
+  \item assurer la persistance des données dans Firebase ;
+  \item informer l'utilisateur en cas de succès ou d'erreur.
+\end{itemize}
+
+\section{Organisation du rapport}
+
+Le premier chapitre présente le contexte et les objectifs du projet. Le deuxième
+chapitre décrit les principes de gestion des produits et les opérations CRUD.
+Le troisième chapitre présente l'architecture, la réalisation du code et les écrans.
+Le quatrième chapitre traite de la liaison avec Firebase. Enfin, le dernier chapitre
+présente les tests, les difficultés rencontrées et les perspectives d'évolution.
+
+% ===================== Présentation générale =====================
+\chapter{Gestion des produits}
+
+\section{Description fonctionnelle}
+
+La gestion des produits permet au responsable d'administrer le catalogue du
+coffee-restaurant. Un produit possède les informations suivantes :
+\begin{itemize}[label=\textbullet]
+  \item un identifiant unique généré par Firestore ;
+  \item un nom ;
+  \item une catégorie ;
+  \item une description ;
+  \item un prix en dinars tunisiens ;
+  \item une image optionnelle ;
+  \item un état de disponibilité ;
+  \item une liste de suppléments.
+\end{itemize}
+
+Un supplément contient uniquement un nom et un prix. Il peut être sélectionné
+à la commande pour personnaliser le produit.
+
+\section{Cas d'utilisation}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.8cm and 2.2cm,
+actor/.style={circle,draw,fill=titlegreen!15,minimum size=1.2cm},
+usecase/.style={draw,rounded corners,fill=gray!8,minimum width=4cm,
+               minimum height=1cm,align=center},
+arrow/.style={-{Stealth[length=2.5mm]},thick}]
+\node[actor] (admin) {Responsable};
+\node[usecase, right=of admin,yshift=2.7cm] (lister) {Lister les produits};
+\node[usecase, right=of admin] (ajouter) {Ajouter un produit};
+\node[usecase, right=of admin,yshift=-2.7cm] (modifier) {Modifier un produit};
+\node[usecase, right=of ajouter,xshift=1.2cm,yshift=1.35cm] (supprimer) {Supprimer un produit};
+\node[usecase, right=of modifier,xshift=1.2cm,yshift=-1.35cm] (dispo) {Changer la disponibilité};
+\draw[arrow] (admin)--(lister);
+\draw[arrow] (admin)--(ajouter);
+\draw[arrow] (admin)--(modifier);
+\draw[arrow] (admin)--(supprimer);
+\draw[arrow] (admin)--(dispo);
+\end{tikzpicture}
+\caption{Diagramme simplifié des fonctionnalités de gestion des produits}
+\label{fig:cas_utilisation}
+\end{figure}
+
+\section{Les opérations CRUD}
+
+\subsection{Création}
+
+Depuis l'écran de gestion du menu, le responsable appuie sur le bouton
+\texttt{+} puis renseigne le formulaire. Les champs obligatoires sont le nom,
+la catégorie, la description et le prix. Le prix doit être strictement positif.
+Une image peut être choisie dans la galerie.
+
+La création produit un objet \texttt{Product} puis appelle
+\texttt{MenuProvider.addProduct}. Le dépôt crée un document dans la collection
+\texttt{products} avec un identifiant généré automatiquement.
+
+\subsection{Lecture}
+
+Au démarrage de l'application, \texttt{loadMenu()} charge simultanément les catégories
+et les produits depuis Firestore. Les données sont stockées dans
+\texttt{MenuProvider}. La liste peut être filtrée par texte ou par catégorie sans
+interroger à nouveau la base.
+
+\subsection{Modification}
+
+Le responsable ouvre le formulaire d'un produit existant. Les valeurs actuelles
+sont préchargées dans les contrôleurs. Après validation, \texttt{updateProduct}
+met à jour le document correspondant à \texttt{product.id}. Le champ
+\texttt{createdAt} n'est pas modifié.
+
+\subsection{Suppression}
+
+Avant la suppression, une boîte de dialogue demande une confirmation. Après
+validation, \texttt{deleteProduct(productId)} supprime le document Firestore.
+Le produit est ensuite retiré de la liste locale afin de mettre immédiatement
+l'interface à jour.
+
+\subsection{Changement de disponibilité}
+
+Le gestionnaire utilise un interrupteur sur chaque carte de produit. Lorsque
+l'administrateur modifie l'état, \texttt{toggleAvailability} crée une copie du
+produit avec \texttt{isAvailable} inversé. Une mise à jour locale optimiste est
+effectuée avant l'écriture distante.
+
+\section{Tableau récapitulatif des CRUD}
+
+\begin{table}[H]
+\centering
+\caption{Correspondance entre les actions et les opérations Firestore}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{2.5cm}p{3cm}p{4.1cm}X}
+\toprule
+Opération & Action utilisateur & Fonction applicative & Opération Firestore \\
+\midrule
+Create & Ajouter un produit & \texttt{addProduct()} & \texttt{doc().set()} \\
+Read & Charger/filtrer & \texttt{fetchProducts()} & \texttt{collection().get()} \\
+Update & Modifier & \texttt{updateProduct()} & \texttt{doc(id).update()} \\
+Delete & Supprimer & \texttt{deleteProduct()} & \texttt{doc(id).delete()} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ===================== Réalisation =====================
+\chapter{Réalisation technique}
+
+\section{Technologies utilisées}
+
+\begin{table}[H]
+\centering
+\caption{Outils et technologies utilisés}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{3cm}X}
+\toprule
+Technologie & Rôle \\
+\midrule
+Flutter & Développement de l'interface multi-plateformes \\
+Dart & Langage de programmation principal \\
+Provider & Gestion et diffusion de l'état applicatif \\
+Cloud Firestore & Stockage NoSQL des produits et catégories \\
+Firebase Core & Initialisation de Firebase \\
+Image Picker & Sélection d'une image depuis la galerie \\
+Material Design & Construction des composants d'interface \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Architecture de l'application}
+
+Le module suit une séparation des responsabilités :
+\begin{itemize}[label=\textbullet]
+  \item \texttt{models} : représentation des données ;
+  \item \texttt{data} : accès à Firebase et interface du dépôt ;
+  \item \texttt{providers} : état applicatif et notifications de l'interface ;
+  \item \texttt{screens} : écrans de gestion et formulaires ;
+  \item \texttt{widgets} : composants visuels réutilisables.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.2cm,
+box/.style={draw,rounded corners,minimum width=4.2cm,minimum height=1cm,
+            align=center,fill=titlegreen!8},
+arrow/.style={-{Stealth[length=2.5mm]},thick}]
+\node[box] (ui) {Screens / Widgets};
+\node[box, below=of ui] (provider) {MenuProvider};
+\node[box, below=of provider] (contract) {MenuRepository};
+\node[box, below=of contract] (firebase) {FirebaseMenuRepository};
+\node[box, below=of firebase] (db) {Cloud Firestore};
+\draw[arrow] (ui)--(provider);
+\draw[arrow] (provider)--(contract);
+\draw[arrow] (contract)--(firebase);
+\draw[arrow] (firebase)--(db);
+\end{tikzpicture}
+\caption{Architecture en couches du module}
+\label{fig:architecture}
+\end{figure}
+
+\section{Modèle Produit}
+
+La classe \texttt{Product} centralise les champs persistés. Elle fournit
+également \texttt{toMap()} pour la conversion vers Firestore et
+\texttt{fromMap()} pour la reconstruction depuis un document.
+
+\lstinputlisting[
+  language=C,
+  caption={Modèle \texttt{Product}},
+  label={lst:product}
+]{lib/features/admin/menu/models/product.dart}
+
+\section{Contrat du dépôt}
+
+Le dépôt expose une abstraction indépendante de la technologie Firebase.
+Cette séparation facilite les tests et permet éventuellement de remplacer
+FireStore par une autre source de données.
+
+\lstinputlisting[
+  language=C,
+  caption={Interface \texttt{MenuRepository}},
+  label={lst:repository}
+]{lib/features/admin/menu/data/menu_repository.dart}
+
+\section{Gestion de l'état avec Provider}
+
+\texttt{MenuProvider} contient la liste des produits, les catégories, les filtres,
+l'état de chargement et les éventuelles erreurs. Les méthodes CRUD modifient
+les données locales puis notifiant les widgets avec \texttt{notifyListeners()}.
+
+\lstinputlisting[
+  language=C,
+  caption={Méthodes CRUD du \texttt{MenuProvider}},
+  firstline=63,
+  lastline=112,
+  label={lst:provider_crud}
+]{lib/features/admin/menu/providers/menu_provider.dart}
+
+\section{Écran de gestion des produits}
+
+L'écran affiche une barre de recherche, un filtre de catégories et une liste
+de cartes produits. Chaque carte contient les actions voir, modifier et supprimer,
+ainsi qu'un interrupteur de disponibilité.
+
+\lstinputlisting[
+  language=C,
+  caption={Actions de gestion depuis l'écran principal},
+  firstline=25,
+  lastline=68,
+  label={lst:screen_actions}
+]{lib/features/admin/menu/screens/menu_management_screen.dart}
+
+\section{Carte d'affichage d'un produit}
+
+Le widget \texttt{AdminProductCard} construit l'affichage d'un produit dans la
+liste administrateur. Il affiche l'image, le nom, la catégorie, le prix et
+l'état de disponibilité. Il contient également les actions de consultation,
+de modification et de suppression.
+
+\lstinputlisting[
+  language=C,
+  caption={Carte \texttt{AdminProductCard}},
+  label={lst:admin_product_card}
+]{lib/features/admin/menu/widgets/admin_product_card.dart}
+
+\section{Fiche détaillée d'un produit}
+
+La fonction \texttt{showProductDetailsSheet()} ouvre une fenêtre modale contenant
+les informations complètes du produit sélectionné : image, nom, catégorie,
+prix, description et disponibilité. Le même fichier fournit également la fiche
+détaillée d'une catégorie et la liste de ses produits.
+
+\lstinputlisting[
+  language=C,
+  caption={Fiche détaillée et feuille modale du produit},
+  label={lst:menu_item_details_sheet}
+]{lib/features/admin/menu/widgets/menu_item_details_sheet.dart}
+
+\section{Gestion des suppléments}
+
+Le widget \texttt{SupplementsEditor} permet d'ajouter ou de retirer les
+suppléments associés à un produit. Chaque supplément contient un nom et un
+prix. Les lignes saisies sont filtrées avant d'être transmises au formulaire
+principal grâce à la fonction de rappel \texttt{onChanged}.
+
+\lstinputlisting[
+  language=C,
+  caption={Éditeur de suppléments du produit},
+  label={lst:supplements_editor}
+]{lib/features/admin/menu/widgets/supplements_editor.dart}
+
+\section{Formulaire d'ajout et de modification}
+
+Le formulaire utilise une \texttt{GlobalKey<FormState>} pour valider les champs
+avant l'enregistrement. Le même écran est utilisé pour l'ajout et la modification :
+la présence de \texttt{widget.product} détermine le mode.
+
+\lstinputlisting[
+  language=C,
+  caption={Logique d'ajout et de modification},
+  firstline=66,
+  lastline=111,
+  label={lst:form_save}
+]{lib/features/admin/menu/screens/product_form_screen.dart}
+
+\section{Gestion de l'image}
+
+L'image est sélectionnée avec \texttt{ImagePicker}. Elle est redimensionnée,
+compressée puis convertie en chaîne Base64 avec le préfixe
+\texttt{data:image/jpeg;base64,}. Cette valeur est enregistrée dans le champ
+\texttt{imageUrl}. Une limite est appliquée pour rester sous la taille maximale
+recommandée d'un document Firestore.
+
+\lstinputlisting[
+  language=C,
+  caption={Sélection et conversion de l'image},
+  firstline=48,
+  lastline=69,
+  label={lst:image}
+]{lib/features/admin/menu/screens/product_form_screen.dart}
+
+\section{Affichage des produits côté client}
+
+\texttt{ClientMenuScreen} présente les produits disponibles aux clients. Les
+produits indisponibles sont exclus de la liste, puis le résultat peut être
+filtré par catégorie et par recherche sur le nom ou la description.
+
+\lstinputlisting[
+  language=C,
+  caption={Écran du menu côté client},
+  label={lst:client_menu_screen}
+]{lib/features/client/menu/screens/client_menu_screen.dart}
+
+\section{Carte produit côté client}
+
+Le widget \texttt{ClientProductTile} affiche l'image, le nom, la description et
+le prix d'un produit dans la liste du menu client. Un premier appui ouvre la
+fiche détaillée du produit, tandis que le bouton d'ajout permet de placer le
+produit dans le panier.
+
+\lstinputlisting[
+  language=C,
+  caption={Carte réutilisable \texttt{ClientProductTile}},
+  label={lst:client_product_tile}
+]{lib/features/client/menu/widgets/client_product_tile.dart}
+
+\section{Fiche détaillée côté client}
+
+\texttt{ProductDetailScreen} affiche les informations détaillées du produit
+sélectionné. L'utilisateur peut choisir les suppléments proposés, modifier la
+quantité et ajouter le produit au panier. Cette même fiche peut être utilisée
+en mode sélection lors de l'ajout d'un produit à une commande.
+
+\lstinputlisting[
+  language=C,
+  caption={Fiche détaillée du produit côté client},
+  label={lst:client_product_detail}
+]{lib/features/client/menu/screens/product_detail_screen.dart}
+
+% ===================== Firebase =====================
+\chapter{Liaison avec Firebase}
+
+\section{Configuration du projet}
+
+Firebase Cloud Firestore est initialisé au démarrage de l'application dans
+\texttt{main()}. La méthode \texttt{Firebase.initializeApp()} reçoit les options
+générées pour la plateforme courante par FlutterFire CLI.
+
+\lstinputlisting[
+  language=C,
+  caption={Initialisation de Firebase dans \texttt{main()}},
+  firstline=21,
+  lastline=39,
+  label={lst:firebase_init}
+]{lib/main.dart}
+
+\section{Structure des données}
+
+Le module utilise principalement deux collections :
+\begin{itemize}[label=\textbullet]
+  \item \texttt{categories} : catégories du menu ;
+  \item \texttt{products} : informations des produits.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Structure du document \texttt{products}}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{3cm}p{3cm}X}
+\toprule
+Champ & Type & Exemple \\
+\midrule
+name & String & Cappuccino \\
+categoryId & String & ID du document catégorie \\
+description & String & Café espresso avec lait mousseux \\
+price & Number & 6.500 \\
+imageUrl & String/null & URL, asset ou data URL \\
+isAvailable & Boolean & true \\
+supplements & Array & \texttt{[\{name: Noisette, price: 1\}]} \\
+createdAt & Timestamp & Horodatage serveur \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Implémentation du dépôt Firebase}
+
+\texttt{FirebaseMenuRepository} encapsule toutes les requêtes vers Firestore.
+Il crée les références des collections \texttt{categories} et \texttt{products}
+puis réalise les opérations CRUD.
+
+\lstinputlisting[
+  language=C,
+  caption={Implémentation Firebase du dépôt menu},
+  firstline=1,
+  lastline=101,
+  label={lst:firebase_repository}
+]{lib/features/admin/menu/data/firebase_menu_repository.dart}
+
+\section{Lecture des produits}
+
+Les produits sont chargés avec \texttt{orderBy('createdAt')}. Cette approche permet
+de conserver un ordre chronologique, tandis que \texttt{fromMap()} convertit chaque
+document en objet Dart.
+
+\section{Ajout d'un produit}
+
+Lors de l'ajout, \texttt{\_products.doc()} crée une référence dotée d'un identifiant
+généré par Firestore. L'opération \texttt{set()} écrit les données du produit et
+ajoute \texttt{createdAt} avec \texttt{FieldValue.serverTimestamp()}.
+
+\section{Modification d'un produit}
+
+La modification utilise \texttt{update()} sur le document identifié par
+\texttt{product.id}. Cette méthode ne remplace pas le champ \texttt{createdAt},
+qui reste inchangé.
+
+\section{Suppression d'un produit}
+
+La suppression utilise \texttt{delete()} sur le document ciblé. Elle est précédée
+dans l'interface par une confirmation afin d'éviter une suppression involontaire.
+
+\section{Injection du dépôt}
+
+Au démarrage, \texttt{FirebaseMenuRepository()} est injecté dans
+\texttt{CoffeeShopApp}. \texttt{MenuProvider} utilise ensuite cette implémentation
+pour charger les données et effectuer les opérations CRUD.
+
+\begin{lstlisting}[language=C,caption={Partie du gestionnaire des produits dans \texttt{main.dart}}]
+ChangeNotifierProvider<MenuProvider>(
+  // Voici la partie de gestion des produits :
+  // FirebaseMenuRepository fournit les données de MenuProvider.
+  create: (_) => MenuProvider(menuRepository)..loadMenu(),
+),
+\end{lstlisting}
+
+\lstinputlisting[
+  language=C,
+  caption={Injection du dépôt Firebase dans Provider},
+  firstline=41,
+  lastline=68,
+  label={lst:provider_injection}
+]{lib/main.dart}
+
+% ===================== Tests / conclusion =====================
+\chapter{Tests et conclusion}
+
+\section{Scénarios de test}
+
+\begin{table}[H]
+\centering
+\caption{Principaux scénarios testés}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{2.8cm}p{4.5cm}X}
+\toprule
+Scénario & Test effectué & Résultat attendu \\
+\midrule
+Ajout valide & Saisie de tous les champs obligatoires & Produit ajouté à Firestore \\
+Champ manquant & Nom ou catégorie vide & Message de validation \\
+Prix invalide & Prix nul ou texte & Enregistrement refusé \\
+Modification & Changement du nom ou du prix & Document Firestore mis à jour \\
+Suppression & Confirmation puis annulation & Document supprimé ou conservé \\
+Disponibilité & Activation/désactivation & Champ modifié dans Firestore \\
+Recherche & Saisie du nom ou de la description & Liste filtrée localement \\
+Filtre catégorie & Sélection d'une catégorie & Produits associés seulement \\
+Erreur réseau & Arrêt temporaire de Firebase & Message d'erreur affiché \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Résultats obtenus}
+
+Le module permet de gérer l'ensemble du cycle de vie d'un produit. Les opérations
+de lecture, création, modification et suppression communiquent avec Firebase.
+La recherche et le filtre améliorent l'expérience de l'administrateur.
+
+L'état \texttt{isAvailable} permet de masquer temporairement un produit aux clients
+sans supprimer sa fiche. Les produits sont associés à une catégorie et peuvent
+comprendre plusieurs suppléments.
+
+\section{Difficultés rencontrées}
+
+Plusieurs difficultés ont été rencontrées lors du développement :
+\begin{itemize}[label=\textbullet]
+  \item gestion de la conversion entre les objets Dart et les documents Firestore ;
+  \item conservation des identifiants des documents ;
+  \item validation des valeurs numériques ;
+  \item gestion des erreurs réseau ;
+  \item limitation de la taille des images enregistrées dans Firestore ;
+  \item synchronisation de l'état local après chaque opération.
+\end{itemize}
+
+\section{Conclusion générale}
+
+Le module de gestion des produits réalisé avec Flutter et Firebase répond aux
+besoins essentiels d'administration du menu. Il fournit des interfaces claires,
+des validations, une gestion centralisée de l'état et une persistance distante.
+
+L'architecture proposée sépare l'interface, la logique métier et l'accès aux données.
+Cette organisation rend le code plus lisible, maintenable et évolutif.
+
+\section{Perspectives}
+
+Plusieurs améliorations peuvent être envisagées :
+\begin{itemize}[label=\textbullet]
+  \item utiliser Firebase Storage pour les images ;
+  \item ajouter les règles de sécurité Firestore ;
+  \item afficher les données en temps réel avec des \texttt{StreamBuilder} ;
+  \item ajouter des tests unitaires et des tests d'intégration ;
+  \item ajouter une pagination pour les grands catalogues ;
+  \item gérer des rôles plus détaillés pour les administrateurs ;
+  \item ajouter une gestion des promotions et des variantes.
+\end{itemize}
+
+% ===================== Annexes =====================
+\appendix
+\chapter{Extrait du modèle complémentaire}
+
+\lstinputlisting[
+  language=C,
+  caption={Modèle \texttt{Supplement}},
+  label={lst:supplement}
+]{lib/features/admin/menu/models/supplement.dart}
+
+\chapter{Extrait du modèle catégorie}
+
+\lstinputlisting[
+  language=C,
+  caption={Modèle \texttt{Category}},
+  label={lst:category}
+]{lib/features/admin/menu/models/category.dart}
+
+\begin{thebibliography}{9}
+\bibitem{flutter}
+Flutter Documentation.
+\newblock \url{https://docs.flutter.dev/}
+
+\bibitem{firebase}
+Firebase Documentation.
+\newblock \url{https://firebase.google.com/docs}
+
+\bibitem{firestore}
+Cloud Firestore Documentation.
+\newblock \url{https://firebase.google.com/docs/firestore}
+
+\bibitem{provider}
+Provider Package.
+\newblock \url{https://pub.dev/packages/provider}
+\end{thebibliography}
+
+\end{document}

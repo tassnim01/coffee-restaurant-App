@@ -26,7 +26,7 @@ import 'features/client/orders/data/client_order_repository.dart';
 import 'features/admin/auth/admin_access_gate.dart';
 
 /// Temporaire : true = espace client, false = espace responsable.
-const bool kStartAsClient = true;
+const bool kStartAsClient = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,6 +66,8 @@ class CoffeeShopApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<MenuProvider>(
+          // Voici la partie de gestion des produits :
+          // FirebaseMenuRepository fournit les données de MenuProvider.
           create: (_) => MenuProvider(menuRepository)..loadMenu(),
         ),
         ChangeNotifierProvider<OrdersProvider>(

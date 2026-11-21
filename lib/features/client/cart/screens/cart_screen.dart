@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../widgets/table_number_dialog.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/widgets/auth_sheet.dart';
 import '../../orders/providers/client_orders_provider.dart';
@@ -50,7 +51,7 @@ class CartScreen extends StatelessWidget {
     if (user == null) return;
 
     if (user.tableNumber == null || user.tableNumber!.trim().isEmpty) {
-      final tableNumber = await showTableNumberDialog(context, name: user.name);
+      final tableNumber = await showTableNumberDialog(context, user);
       if (tableNumber == null || !context.mounted) return;
       auth.setTableNumber(tableNumber);
     }

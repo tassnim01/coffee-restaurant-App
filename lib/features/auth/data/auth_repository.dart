@@ -24,6 +24,11 @@ abstract class AuthRepository {
 
   Future<AppUser?> loadProfile(String uid);
 
+  Future<bool> validateCredentials({
+    required String email,
+    required String password,
+  });
+
   Future<AppUser> updateProfile({
     required AppUser user,
     required String name,

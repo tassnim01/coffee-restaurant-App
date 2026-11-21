@@ -24,6 +24,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /settings/counters {
+      allow read: if signedIn();
+      allow write: if signedIn();
+    }
+
     match /categories/{categoryId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -42,7 +47,7 @@ service cloud.firestore {
 
     match /clients/{clientId} {
       allow read: if signedIn() && (isAdmin() || request.auth.uid == clientId);
-      allow create: if isAdmin();
+      allow create: if signedIn() && request.auth.uid == clientId;
       allow update: if signedIn() && (isAdmin() || request.auth.uid == clientId);
       allow delete: if isAdmin();
     }

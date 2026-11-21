@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/theme_mode_provider.dart';
+import '../../../auth/data/biometric_service.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/widgets/auth_sheet.dart';
 import 'profile_screen.dart';
@@ -22,11 +23,14 @@ class ClientSettingsScreen extends StatefulWidget {
 class _ClientSettingsScreenState extends State<ClientSettingsScreen> {
   static const _notifKey = 'notifications_enabled';
   bool _notifications = true;
+  bool _biometricsAvailable = false;
+  bool _biometricsEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _load();
+    _loadBiometrics();
   }
 
   Future<void> _load() async {
@@ -39,6 +43,58 @@ class _ClientSettingsScreenState extends State<ClientSettingsScreen> {
     setState(() => _notifications = value);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_notifKey, value);
+  }
+
+  Future<void> _loadBiometrics() async {
+    final available = await BiometricService.isAvailable();
+    final enabled = available && await BiometricService.isEnabled();
+    if (!mounted) return;
+    setState(() {
+      _biometricsAvailable = available;
+      _biometricsEnabled = enabled;
+    });
+  }
+
+  Future<void> _setBiometrics(bool value) async {
+    if (!value) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Face ID est obligatoire après l’inscription et ne peut pas être désactivé.',
+              ),
+            ),
+          );
+      }
+      return;
+    }
+
+    if (value) {
+      final available = await BiometricService.isAvailable();
+      if (!mounted) return;
+      setState(() => _biometricsAvailable = available);
+      if (!available) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Configurez d’abord la reconnaissance faciale ou une empreinte dans les paramètres du téléphone.',
+              ),
+            ),
+          );
+        return;
+      }
+
+      await showAuthSheet(context, startWithLogin: true);
+      if (mounted) await _loadBiometrics();
+      return;
+    }
+
+    await BiometricService.clear();
+    if (mounted) setState(() => _biometricsEnabled = false);
   }
 
   void _showSheet(String title, List<Widget> children) {
@@ -183,6 +239,10 @@ class _ClientSettingsScreenState extends State<ClientSettingsScreen> {
       newPassword: result.next,
     );
     if (!mounted) return;
+    if (updated && await BiometricService.isEnabled()) {
+      await BiometricService.enable(user.email, result.next);
+    }
+    if (!mounted) return;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -214,6 +274,7 @@ class _ClientSettingsScreenState extends State<ClientSettingsScreen> {
       return;
     }
     Navigator.of(context).popUntil((route) => route.isFirst);
+    await BiometricService.clear();
   }
 
   Future<void> _logout() async {
@@ -265,6 +326,19 @@ class _ClientSettingsScreenState extends State<ClientSettingsScreen> {
                         Icons.lock_outline_rounded,
                         'Changer le mot de passe',
                         onTap: _changePassword,
+                      ),
+                      _tile(
+                        Icons.fingerprint_rounded,
+                        BiometricService.label,
+                        value: !_biometricsAvailable
+                            ? 'Non disponible'
+                            : _biometricsEnabled
+                            ? 'Activée'
+                            : 'Désactivée',
+                        trailing: Switch(
+                          value: _biometricsEnabled,
+                          onChanged: _setBiometrics,
+                        ),
                       ),
                     ]),
                     const SizedBox(height: 16),

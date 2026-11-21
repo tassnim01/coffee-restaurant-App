@@ -7,6 +7,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../auth/models/app_user.dart';
+import '../../auth/data/biometric_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/widgets/auth_sheet.dart';
 import '../orders/screens/my_orders_screen.dart';
@@ -31,6 +32,15 @@ class AccountScreen extends StatelessWidget {
       currentPassword: changes.currentPassword,
       newPassword: changes.newPassword,
     )) {
+      // Face ID : garde le nouveau mot de passe pour les prochaines connexions.
+      if (await BiometricService.isEnabled()) {
+        if (changes.email.trim() != user.email) {
+          await BiometricService.clear();
+        } else if (changes.newPassword case final newPassword?) {
+          await BiometricService.enable(user.email, newPassword);
+        }
+      }
+
       if (context.mounted) {
         _showInfo(
           context,

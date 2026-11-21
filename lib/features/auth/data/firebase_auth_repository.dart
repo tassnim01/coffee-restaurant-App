@@ -136,6 +136,32 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<bool> validateCredentials({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      await _auth.signOut();
+      return true;
+    } on FirebaseAuthException catch (e) {
+      await _auth.signOut();
+      // Preserve local credentials when Firebase cannot be reached or is
+      // temporarily blocking verification.
+      if (e.code == 'network-request-failed' || e.code == 'too-many-requests') {
+        return true;
+      }
+      return false;
+    } catch (_) {
+      await _auth.signOut();
+      return false;
+    }
+  }
+
+  @override
   Future<AppUser> updateProfile({
     required AppUser user,
     required String name,

@@ -119,6 +119,12 @@ class _FakeAuthRepository implements AuthRepository {
   Future<AppUser?> loadProfile(String uid) async => null;
 
   @override
+  Future<bool> validateCredentials({
+    required String email,
+    required String password,
+  }) async => true;
+
+  @override
   Future<AppUser> updateProfile({
     required AppUser user,
     required String name,

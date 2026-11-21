@@ -82,6 +82,13 @@ class AuthProvider extends ChangeNotifier {
     );
   }
 
+  Future<bool> validateCredentials({
+    required String email,
+    required String password,
+  }) async {
+    return _repository.validateCredentials(email: email, password: password);
+  }
+
   Future<bool> deleteAccount({required String password}) async {
     _busy = true;
     _isLoading = true;

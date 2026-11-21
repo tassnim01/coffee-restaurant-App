@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../data/biometric_service.dart';
 import '../providers/auth_provider.dart';
 
 /// Ouvre la fenêtre d'inscription (ou de connexion).
@@ -13,9 +15,8 @@ import '../providers/auth_provider.dart';
 Future<bool?> showAuthSheet(
   BuildContext context, {
   bool startWithLogin = false,
-}) async {
-  final auth = context.read<AuthProvider>();
-  final result = await showModalBottomSheet<_AuthResult>(
+}) {
+  return showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -24,88 +25,6 @@ Future<bool?> showAuthSheet(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
     builder: (_) => _AuthSheet(startWithLogin: startWithLogin),
-  );
-  if (result == null) return null;
-
-  if (result == _AuthResult.registered && context.mounted) {
-    final user = auth.user;
-    if (user != null) {
-      final tableNumber = await showTableNumberDialog(context, name: user.name);
-      if (tableNumber != null && context.mounted) {
-        auth.setTableNumber(tableNumber);
-      }
-    }
-  }
-  return true;
-}
-
-enum _AuthResult { registered, loggedIn }
-
-Future<String?> showTableNumberDialog(
-  BuildContext context, {
-  required String name,
-}) => showDialog<String>(
-  context: context,
-  barrierDismissible: false,
-  builder: (_) => _TableNumberDialog(name: name),
-);
-
-class _TableNumberDialog extends StatefulWidget {
-  final String name;
-
-  const _TableNumberDialog({required this.name});
-
-  @override
-  State<_TableNumberDialog> createState() => _TableNumberDialogState();
-}
-
-class _TableNumberDialogState extends State<_TableNumberDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _tableNumber = TextEditingController();
-
-  @override
-  void dispose() {
-    _tableNumber.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => PopScope(
-    canPop: false,
-    child: AlertDialog(
-      title: Text('Bienvenue, ${widget.name}'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Veuillez saisir votre numéro de table.'),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _tableNumber,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: appInputDecoration(hint: 'Ex. 12'),
-              validator: (value) => (value == null || value.trim().isEmpty)
-                  ? 'Le numéro de table est obligatoire'
-                  : null,
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        FilledButton(
-          onPressed: () {
-            if (!_formKey.currentState!.validate()) return;
-            Navigator.of(context).pop(_tableNumber.text.trim());
-          },
-          style: FilledButton.styleFrom(backgroundColor: AppColors.forestGreen),
-          child: const Text('Confirmer'),
-        ),
-      ],
-    ),
   );
 }
 
@@ -118,6 +37,8 @@ class _AuthSheet extends StatefulWidget {
 }
 
 class _AuthSheetState extends State<_AuthSheet> {
+  static const _badCredentials = 'E-mail ou mot de passe incorrect.';
+
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _phone = TextEditingController();
@@ -126,10 +47,19 @@ class _AuthSheetState extends State<_AuthSheet> {
   late bool _login;
   bool _hidePassword = true;
 
+  bool _bioAvailable = false; // le téléphone sait faire de la biométrie
+  bool _bioEnabled = false; // Face ID déjà activé sur ce téléphone
+  String? _biometricError;
+
+  IconData get _bioIcon => defaultTargetPlatform == TargetPlatform.iOS
+      ? Icons.face_unlock_outlined
+      : Icons.fingerprint;
+
   @override
   void initState() {
     super.initState();
     _login = widget.startWithLogin;
+    _loadBiometrics();
   }
 
   @override
@@ -141,21 +71,110 @@ class _AuthSheetState extends State<_AuthSheet> {
     super.dispose();
   }
 
+  Future<void> _loadBiometrics() async {
+    final available = await BiometricService.isAvailable();
+    var enabled = available && await BiometricService.isEnabled();
+    if (enabled) {
+      final creds = await BiometricService.read();
+      if (creds != null) {
+        if (!mounted) return;
+        final valid = await context.read<AuthProvider>().validateCredentials(
+          email: creds.email,
+          password: creds.password,
+        );
+        if (!valid) {
+          await BiometricService.clear();
+          enabled = false;
+        }
+      } else {
+        await BiometricService.clear();
+        enabled = false;
+      }
+    }
+    if (!mounted) return;
+    setState(() {
+      _bioAvailable = available;
+      _bioEnabled = enabled;
+    });
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
+    setState(() => _biometricError = null);
+
+    if (!_bioAvailable) {
+      setState(() {
+        _biometricError = 'Configurez Face ID ou une empreinte dans les paramètres du téléphone. Cette authentification est obligatoire.';
+      });
+      return;
+    }
+
+    if (!_login && _bioEnabled) {
+      setState(() {
+        _biometricError = 'Le compte actuel est déjà enregistré avec Face ID sur cet appareil.';
+      });
+      return;
+    }
+
+    final email = _email.text.trim();
+    final password = _password.text;
     final auth = context.read<AuthProvider>();
+    final verified = await BiometricService.authenticate(
+      _login
+          ? 'Confirmez votre identité pour enregistrer Face ID.'
+          : 'Confirmez votre identité pour créer votre compte avec Face ID.',
+    );
+    if (!verified) {
+      if (mounted) {
+        setState(() {
+          _biometricError =
+              '${BiometricService.label} est obligatoire pour continuer.';
+        });
+      }
+      return;
+    }
+
     final ok = _login
-        ? await auth.login(email: _email.text, password: _password.text)
+        ? await auth.login(email: email, password: password)
         : await auth.register(
             name: _name.text,
             phone: _phone.text,
-            email: _email.text,
-            password: _password.text,
+            email: email,
+            password: password,
           );
+    if (!ok || !mounted) return;
+
+    await BiometricService.enable(email, password);
+    if (mounted) setState(() => _bioEnabled = true);
+    if (mounted) Navigator.of(context).pop(true);
+  }
+
+  Future<void> _loginWithBiometrics() async {
+    final auth = context.read<AuthProvider>();
+    auth.clearError();
+
+    final verified = await BiometricService.authenticate(
+      'Connectez-vous avec ${BiometricService.label}.',
+    );
+    if (!verified || !mounted) return;
+
+    final creds = await BiometricService.read();
+    if (creds == null) {
+      if (mounted) setState(() => _bioEnabled = false);
+      return;
+    }
+
+    final ok = await auth.login(email: creds.email, password: creds.password);
     if (ok && mounted) {
-      Navigator.of(context)
-          .pop(_login ? _AuthResult.loggedIn : _AuthResult.registered);
+      Navigator.of(context).pop(true);
+      return;
+    }
+
+    // Mot de passe changé depuis : on désactive Face ID.
+    if (auth.error == _badCredentials) {
+      await BiometricService.clear();
+      if (mounted) setState(() => _bioEnabled = false);
     }
   }
 
@@ -209,9 +228,31 @@ class _AuthSheetState extends State<_AuthSheet> {
     );
   }
 
+  Widget _faceIdButton(bool busy) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton.icon(
+        onPressed: busy ? null : _loginWithBiometrics,
+        icon: Icon(_bioIcon, color: AppColors.forestGreen, size: 24),
+        label: Text(
+          'Se connecter avec ${BiometricService.label}',
+          style: AppTextStyles.toggle.copyWith(color: AppColors.forestGreen),
+        ),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: AppColors.forestGreen, width: 1.4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final showFaceIdLogin = _login && _bioAvailable && _bioEnabled;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -237,7 +278,8 @@ class _AuthSheetState extends State<_AuthSheet> {
                 style: AppTextStyles.body.copyWith(color: AppColors.gray),
               ),
               const SizedBox(height: 18),
-              if (!_login) ...[
+              if (showFaceIdLogin) ...[_faceIdButton(auth.isLoading)],
+              if (!showFaceIdLogin && !_login) ...[
                 _field(
                   'Nom complet',
                   _name,
@@ -261,25 +303,39 @@ class _AuthSheetState extends State<_AuthSheet> {
                       : 'Numéro invalide (8 chiffres)',
                 ),
               ],
-              _field(
-                'E-mail',
-                _email,
-                hint: 'exemple@mail.com',
-                keyboardType: TextInputType.emailAddress,
-                validator: (v) =>
-                    RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
-                        .hasMatch((v ?? '').trim())
-                    ? null
-                    : 'Adresse e-mail invalide',
-              ),
-              _field(
-                'Mot de passe',
-                _password,
-                hint: '6 caractères minimum',
-                password: true,
-                validator: (v) =>
-                    (v == null || v.length < 6) ? '6 caractères minimum' : null,
-              ),
+              if (!showFaceIdLogin) ...[
+                _field(
+                  'E-mail',
+                  _email,
+                  hint: 'exemple@mail.com',
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (v) =>
+                      RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                          .hasMatch((v ?? '').trim())
+                      ? null
+                      : 'Adresse e-mail invalide',
+                ),
+                _field(
+                  'Mot de passe',
+                  _password,
+                  hint: '6 caractères minimum',
+                  password: true,
+                  validator: (v) => (v == null || v.length < 6)
+                      ? '6 caractères minimum'
+                      : null,
+                ),
+              ],
+              if (_biometricError != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    _biometricError!,
+                    style: AppTextStyles.chip.copyWith(
+                      color: AppColors.burgundy,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ),
               if (auth.error != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -291,34 +347,35 @@ class _AuthSheetState extends State<_AuthSheet> {
                     ),
                   ),
                 ),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: FilledButton(
-                  onPressed: auth.isLoading ? null : _submit,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.forestGreen,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+              if (!showFaceIdLogin)
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: FilledButton(
+                    onPressed: auth.isLoading ? null : _submit,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.forestGreen,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
-                  ),
-                  child: auth.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+                    child: auth.isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            _login
+                                ? 'Se connecter et valider'
+                                : "S'inscrire avec Face ID",
+                            style: AppTextStyles.button,
                           ),
-                        )
-                      : Text(
-                          _login
-                              ? 'Se connecter et valider'
-                              : "S'inscrire et valider",
-                          style: AppTextStyles.button,
-                        ),
+                  ),
                 ),
-              ),
               const SizedBox(height: 8),
               Center(
                 child: TextButton(

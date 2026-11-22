@@ -33,7 +33,8 @@ class ApkDownloadService {
       );
 
       // Vérifier le résultat du téléchargement
-      if (response.statusCode != 200) {
+      final statusCode = response.statusCode ?? 0;
+      if (statusCode < 200 || statusCode >= 300) {
         throw Exception('Échec du téléchargement');
       }
 

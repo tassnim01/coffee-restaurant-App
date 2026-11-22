@@ -38,13 +38,13 @@ class _UpdateGateState extends State<UpdateGate> {
     }
 
     // Android : télécharger l'APK
-    final apkUrl = config.apkUrl;
+    final apkUrl = config.apkUrl.isNotEmpty
+        ? config.apkUrl
+        : config.storeUrlAndroid;
 
     if (apkUrl.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lien de téléchargement indisponible'),
-        ),
+        const SnackBar(content: Text('Lien de téléchargement indisponible')),
       );
       return;
     }
@@ -66,24 +66,21 @@ class _UpdateGateState extends State<UpdateGate> {
         },
       );
 
-if (!context.mounted) return;
+      if (!context.mounted) return;
       // Ouvrir l'installateur Android
       final result = await OpenFilex.open(apkPath);
 
-if (result.type != ResultType.done && context.mounted) {        ScaffoldMessenger.of(context).showSnackBar(
+      if (result.type != ResultType.done && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Impossible d’ouvrir l’APK : ${result.message}',
-            ),
+            content: Text('Impossible d’ouvrir l’APK : ${result.message}'),
           ),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur de téléchargement : $e'),
-          ),
+          SnackBar(content: Text('Erreur de téléchargement : $e')),
         );
       }
     } finally {
@@ -281,10 +278,7 @@ class _UpdateCard extends StatelessWidget {
             // Bouton Plus tard
             if (onLater != null) ...[
               const SizedBox(height: 8),
-              TextButton(
-                onPressed: onLater,
-                child: const Text('Plus tard'),
-              ),
+              TextButton(onPressed: onLater, child: const Text('Plus tard')),
             ],
           ],
         ),

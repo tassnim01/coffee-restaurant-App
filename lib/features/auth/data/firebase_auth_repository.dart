@@ -102,8 +102,14 @@ class FirebaseAuthRepository implements AuthRepository {
         password: password,
       );
       final uid = cred.user!.uid;
-      return await loadProfile(uid) ??
-          AppUser(uid: uid, name: email.trim(), phone: '', email: email.trim());
+      final profile = await loadProfile(uid);
+      if (profile == null) {
+        await _auth.signOut();
+        throw const AuthFailure(
+          'Ce compte ne peut pas accéder à l’espace client.',
+        );
+      }
+      return profile;
     } on FirebaseAuthException catch (e) {
       throw _failure(e);
     }
@@ -114,6 +120,10 @@ class FirebaseAuthRepository implements AuthRepository {
     final snap = await _db.collection('users').doc(uid).get();
     final data = snap.data();
     if (data == null) return null;
+    if (data['role'] == 'admin') {
+      await _auth.signOut();
+      return null;
+    }
     final authUser = _auth.currentUser;
     final authEmail = authUser?.uid == uid ? authUser?.email : null;
     final email = authEmail ?? data['email'] as String? ?? '';
@@ -253,9 +263,10 @@ class FirebaseAuthRepository implements AuthRepository {
       await user.delete();
     } on FirebaseAuthException catch (e) {
       throw _failure(e);
-    } on FirebaseException {
-      throw const AuthFailure(
-        'Impossible de supprimer les données du compte. Réessayez.',
+    } on FirebaseException catch (e) {
+      throw AuthFailure(
+        'Impossible de supprimer les données du compte '
+        '(code ${e.code}). Réessayez.',
       );
     }
   }

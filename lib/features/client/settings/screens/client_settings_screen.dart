@@ -25,6 +25,7 @@ class _ClientSettingsScreenState extends State<ClientSettingsScreen> {
   bool _notifications = true;
   bool _biometricsAvailable = false;
   bool _biometricsEnabled = false;
+  String _biometricLabel = 'Face ID / empreinte';
 
   @override
   void initState() {
@@ -47,11 +48,13 @@ class _ClientSettingsScreenState extends State<ClientSettingsScreen> {
 
   Future<void> _loadBiometrics() async {
     final available = await BiometricService.isAvailable();
+    final label = await BiometricService.detectedLabel();
     final enabled = available && await BiometricService.isEnabled();
     if (!mounted) return;
     setState(() {
       _biometricsAvailable = available;
       _biometricsEnabled = enabled;
+      _biometricLabel = label;
     });
   }
 
@@ -329,7 +332,7 @@ class _ClientSettingsScreenState extends State<ClientSettingsScreen> {
                       ),
                       _tile(
                         Icons.fingerprint_rounded,
-                        BiometricService.label,
+                        _biometricLabel,
                         value: !_biometricsAvailable
                             ? 'Non disponible'
                             : _biometricsEnabled

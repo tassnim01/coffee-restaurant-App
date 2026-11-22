@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -11,6 +12,7 @@ import '../../../admin/orders/models/restaurant_order.dart';
 import '../../../admin/orders/widgets/product_thumb.dart';
 import '../../../admin/orders/widgets/order_status_stepper.dart';
 import '../../cart/models/cart_item.dart';
+import '../services/order_invoice_generator.dart';
 import 'client_order_product_menu_screen.dart';
 import '../providers/client_orders_provider.dart';
 
@@ -18,6 +20,23 @@ class ClientOrderDetailScreen extends StatelessWidget {
   final String orderId;
 
   const ClientOrderDetailScreen({super.key, required this.orderId});
+
+  Future<void> _openInvoice(BuildContext context, RestaurantOrder order) async {
+    try {
+      final bytes = await OrderInvoiceGenerator.generate(order);
+      await Printing.layoutPdf(
+        name: 'addition-${order.code.replaceAll('#', '')}.pdf',
+        onLayout: (_) async => bytes,
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text("Impossible d'ouvrir l'addition PDF.")),
+        );
+    }
+  }
 
   Future<void> _editOrder(BuildContext context, RestaurantOrder order) async {
     final items = await showModalBottomSheet<List<OrderItem>>(
@@ -165,6 +184,25 @@ class ClientOrderDetailScreen extends StatelessWidget {
           Divider(color: AppColors.border, height: 1),
           const SizedBox(height: 12),
           _totalRow('Total', money(order.total), big: true),
+          if (order.status == OrderStatus.delivered) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton.icon(
+                onPressed: () => _openInvoice(context, order),
+                icon: const Icon(Icons.picture_as_pdf_outlined),
+                label: const Text('Voir l’addition PDF'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.forestGreen,
+                  side: const BorderSide(color: AppColors.forestGreen),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 6),
           Align(
             alignment: Alignment.centerLeft,

@@ -16,7 +16,7 @@ service cloud.firestore {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow create: if signedIn() && request.auth.uid == uid;
       allow update: if signedIn() && (request.auth.uid == uid || isAdmin());
-      allow delete: if isAdmin();
+      allow delete: if signedIn() && request.auth.uid == uid;
     }
 
     match /settings/{document=**} {
@@ -49,7 +49,7 @@ service cloud.firestore {
       allow read: if signedIn() && (isAdmin() || request.auth.uid == clientId);
       allow create: if signedIn() && request.auth.uid == clientId;
       allow update: if signedIn() && (isAdmin() || request.auth.uid == clientId);
-      allow delete: if isAdmin();
+      allow delete: if signedIn() && request.auth.uid == clientId;
     }
   }
 }

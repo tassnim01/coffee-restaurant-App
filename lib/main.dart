@@ -24,9 +24,12 @@ import 'features/payment/widgets/payment_gate.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/client/orders/data/client_order_repository.dart';
 import 'features/admin/auth/admin_access_gate.dart';
+import 'features/app_version/data/app_version_repository.dart';
+import 'features/app_version/providers/app_version_provider.dart';
+import 'features/app_version/widgets/update_banner.dart';
 
 /// Temporaire : true = espace client, false = espace responsable.
-const bool kStartAsClient = true;
+const bool kStartAsClient = false;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -79,6 +82,9 @@ class CoffeeShopApp extends StatelessWidget {
         ChangeNotifierProvider<ThemeModeProvider>(
           create: (_) => ThemeModeProvider(),
         ),
+        ChangeNotifierProvider<AppVersionProvider>(
+          create: (_) => AppVersionProvider(AppVersionRepository()),
+        ),
         if (clientMode) ...[
           ChangeNotifierProvider<AuthProvider>(
             create: (_) =>
@@ -100,9 +106,11 @@ class CoffeeShopApp extends StatelessWidget {
           darkTheme: AppTheme.dark,
           themeMode: themeMode.themeMode,
           home: clientMode ? const WelcomeScreen() : const AdminAccessGate(),
-          builder: (context, child) => PaymentGate(
-            isClient: clientMode,
-            child: child ?? const SizedBox.shrink(),
+          builder: (context, child) => UpdateGate(
+            child: PaymentGate(
+              isClient: clientMode,
+              child: child ?? const SizedBox.shrink(),
+            ),
           ),
         ),
       ),

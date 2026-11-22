@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -21,9 +22,35 @@ class PaymentGate extends StatefulWidget {
   State<PaymentGate> createState() => _PaymentGateState();
 }
 
-class _PaymentGateState extends State<PaymentGate> {
+class _PaymentGateState extends State<PaymentGate> with WidgetsBindingObserver {
   String? _blockedCode; // client : dernière commande qui bloquait
   String? _successCode;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // L'app redevient visible : on force l'affichage immédiat du blocage
+    // (évite une frame où l'ancien contenu serait visible).
+    if (state == AppLifecycleState.resumed && mounted) {
+      setState(() {});
+    }
+  }
+
+  void _setImmersive(bool on) {
+    SystemChrome.setEnabledSystemUIMode(
+      on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
+    );
+  }
 
   RestaurantOrder? _blocking(BuildContext context) {
     if (!widget.isClient) return null;
@@ -63,15 +90,19 @@ class _PaymentGateState extends State<PaymentGate> {
       overlay = const _ClientBlockedCard();
     }
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        widget.child,
-        if (overlay != null)
-          Positioned.fill(
-            child: _Barrier(fillScreen: blocking != null, child: overlay),
-          ),
-      ],
+    _setImmersive(overlay != null);
+
+    return PopScope(
+      // Le bouton retour (et le geste retour) ne fait rien tant que bloqué.
+      canPop: overlay == null,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          widget.child,
+          if (overlay != null)
+            Positioned.fill(child: _Barrier(fillScreen: true, child: overlay)),
+        ],
+      ),
     );
   }
 }

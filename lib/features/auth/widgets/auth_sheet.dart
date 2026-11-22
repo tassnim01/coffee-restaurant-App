@@ -49,6 +49,7 @@ class _AuthSheetState extends State<_AuthSheet> {
 
   bool _bioAvailable = false; // le téléphone sait faire de la biométrie
   bool _bioEnabled = false; // Face ID déjà activé sur ce téléphone
+  String _biometricLabel = 'Face ID / empreinte';
   String? _biometricError;
 
   IconData get _bioIcon => defaultTargetPlatform == TargetPlatform.iOS
@@ -73,6 +74,7 @@ class _AuthSheetState extends State<_AuthSheet> {
 
   Future<void> _loadBiometrics() async {
     final available = await BiometricService.isAvailable();
+    final label = await BiometricService.detectedLabel();
     var enabled = available && await BiometricService.isEnabled();
     if (enabled) {
       final creds = await BiometricService.read();
@@ -95,6 +97,7 @@ class _AuthSheetState extends State<_AuthSheet> {
     setState(() {
       _bioAvailable = available;
       _bioEnabled = enabled;
+      _biometricLabel = label;
     });
   }
 
@@ -110,6 +113,33 @@ class _AuthSheetState extends State<_AuthSheet> {
       return;
     }
 
+    // Revalider l'enregistrement local au moment de la soumission : les données
+    // peuvent être restées après une suppression directe depuis Firebase.
+    if (!_login) {
+      var enabled = await BiometricService.isEnabled();
+      if (!mounted) return;
+      if (enabled) {
+        final creds = await BiometricService.read();
+        if (!mounted) return;
+        if (creds != null) {
+          final valid = await context.read<AuthProvider>().validateCredentials(
+            email: creds.email,
+            password: creds.password,
+          );
+          if (!mounted) return;
+          enabled = valid;
+        } else {
+          enabled = false;
+        }
+        if (!enabled) {
+          await BiometricService.clear();
+        }
+        if (mounted) setState(() => _bioEnabled = enabled);
+      } else if (mounted) {
+        setState(() => _bioEnabled = false);
+      }
+    }
+
     if (!_login && _bioEnabled) {
       setState(() {
         _biometricError = 'Le compte actuel est déjà enregistré avec Face ID sur cet appareil.';
@@ -119,17 +149,17 @@ class _AuthSheetState extends State<_AuthSheet> {
 
     final email = _email.text.trim();
     final password = _password.text;
+    if (!mounted) return;
     final auth = context.read<AuthProvider>();
     final verified = await BiometricService.authenticate(
       _login
-          ? 'Confirmez votre identité pour enregistrer Face ID.'
-          : 'Confirmez votre identité pour créer votre compte avec Face ID.',
+          ? 'Confirmez votre identité pour enregistrer $_biometricLabel.'
+          : 'Confirmez votre identité pour créer votre compte avec $_biometricLabel.',
     );
     if (!verified) {
       if (mounted) {
         setState(() {
-          _biometricError =
-              '${BiometricService.label} est obligatoire pour continuer.';
+          _biometricError = '$_biometricLabel est obligatoire pour continuer.';
         });
       }
       return;
@@ -155,7 +185,7 @@ class _AuthSheetState extends State<_AuthSheet> {
     auth.clearError();
 
     final verified = await BiometricService.authenticate(
-      'Connectez-vous avec ${BiometricService.label}.',
+      'Connectez-vous avec $_biometricLabel.',
     );
     if (!verified || !mounted) return;
 
@@ -236,7 +266,7 @@ class _AuthSheetState extends State<_AuthSheet> {
         onPressed: busy ? null : _loginWithBiometrics,
         icon: Icon(_bioIcon, color: AppColors.forestGreen, size: 24),
         label: Text(
-          'Se connecter avec ${BiometricService.label}',
+          'Se connecter avec $_biometricLabel',
           style: AppTextStyles.toggle.copyWith(color: AppColors.forestGreen),
         ),
         style: OutlinedButton.styleFrom(

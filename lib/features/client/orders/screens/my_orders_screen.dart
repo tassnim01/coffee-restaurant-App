@@ -14,7 +14,9 @@ import '../providers/client_orders_provider.dart';
 import 'client_order_detail_screen.dart';
 
 class MyOrdersScreen extends StatefulWidget {
-  const MyOrdersScreen({super.key});
+  final bool initialHistory;
+
+  const MyOrdersScreen({super.key, this.initialHistory = false});
 
   @override
   State<MyOrdersScreen> createState() => _MyOrdersScreenState();
@@ -28,13 +30,23 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
     OrderTab.delivered,
   ];
   OrderTab _tab = OrderTab.pending;
+  late bool _historyMode;
+
+  @override
+  void initState() {
+    super.initState();
+    _historyMode = widget.initialHistory;
+  }
 
   @override
   Widget build(BuildContext context) {
     final orders = context.watch<ClientOrdersProvider>();
-    final visible = orders.orders
-        .where((o) => _tab.includes(o.status))
-        .toList();
+    final visible = _historyMode
+        ? orders.orders.where((o) => o.status == OrderStatus.delivered).toList()
+        : orders.orders.where((o) => _tab.includes(o.status)).toList();
+    if (_historyMode) {
+      visible.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -42,17 +54,18 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
         body: Column(
           children: [
             _buildHeader(context),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-              child: _buildTabs(),
-            ),
+            if (!_historyMode)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                child: _buildTabs(),
+              ),
             Expanded(
               child: orders.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : visible.isEmpty
                   ? _buildEmpty()
                   : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
                       itemCount: visible.length,
                       separatorBuilder: (context, index) =>
                           const SizedBox(height: 12),
@@ -88,7 +101,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
           ),
           Expanded(
             child: Text(
-              'Mes commandes',
+              _historyMode ? 'Historique des commandes' : 'Mes commandes',
               style: AppTextStyles.screenTitle.copyWith(color: Colors.white),
             ),
           ),
@@ -177,7 +190,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            'Aucune commande',
+            _historyMode ? 'Aucune ancienne commande' : 'Aucune commande',
             style: AppTextStyles.body.copyWith(color: AppColors.gray),
           ),
         ],
@@ -196,6 +209,11 @@ class _OrderCard extends StatelessWidget {
       color: AppColors.gray,
       fontSize: 12,
     );
+    final supplements = order.items
+        .expand((item) => item.supplements)
+        .map((supplement) => supplement.name)
+        .toSet()
+        .toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -238,6 +256,18 @@ class _OrderCard extends StatelessWidget {
                       Text(order.code, style: AppTextStyles.productName),
                       const SizedBox(height: 4),
                       Text(Formatters.dateTime(order.createdAt), style: subtle),
+                      if (supplements.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Ajouts : ${supplements.join(', ')}',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: subtle.copyWith(
+                            color: AppColors.forestGreen,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

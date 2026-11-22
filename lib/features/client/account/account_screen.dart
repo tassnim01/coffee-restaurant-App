@@ -240,6 +240,16 @@ class AccountScreen extends StatelessWidget {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      _button(
+                        'Historique des commandes',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const MyOrdersScreen(initialHistory: true),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

@@ -17,6 +17,20 @@ class BiometricService {
       ? 'Face ID'
       : 'Face ID / empreinte';
 
+  /// Détecte l'étiquette correspondant aux biométries réellement disponibles.
+  static Future<String> detectedLabel() async {
+    if (kIsWeb) return 'Face ID / empreinte';
+    if (defaultTargetPlatform == TargetPlatform.iOS) return 'Face ID';
+    try {
+      final biometrics = await _auth.getAvailableBiometrics();
+      if (biometrics.contains(BiometricType.face)) return 'Face ID';
+      if (biometrics.contains(BiometricType.fingerprint)) return 'Empreinte';
+      return 'Face ID / empreinte';
+    } catch (_) {
+      return 'Face ID / empreinte';
+    }
+  }
+
   /// true si le téléphone a une biométrie configurée (jamais sur le web).
   static Future<bool> isAvailable() async {
     if (kIsWeb) return false;

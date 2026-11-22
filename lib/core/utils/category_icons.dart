@@ -15,6 +15,7 @@ class CategoryIcons {
     'bakery': Icons.bakery_dining_outlined,
     'icecream': Icons.icecream_outlined,
     'lunch': Icons.lunch_dining_outlined,
+    'salad': Icons.eco_outlined,
     'pizza': Icons.local_pizza_outlined,
     'bar': Icons.local_bar_outlined,
   };

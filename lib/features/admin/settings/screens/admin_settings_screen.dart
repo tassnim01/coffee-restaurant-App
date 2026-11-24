@@ -112,7 +112,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       _phone.text = profile['phone'] as String? ?? '';
       _photoUrl.text = profile['photoUrl'] as String? ?? user.photoURL ?? '';
       _restaurantName.text =
-          restaurant['name'] as String? ?? 'Capucine Restaurant';
+          restaurant['name'] as String? ?? 'Good Food Good Mood';
       _logoUrl.text = restaurant['logoUrl'] as String? ?? '';
       _address.text = restaurant['address'] as String? ?? '';
       _locationUrl.text = restaurant['locationUrl'] as String? ?? '';

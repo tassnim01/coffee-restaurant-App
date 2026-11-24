@@ -100,7 +100,7 @@ class CoffeeShopApp extends StatelessWidget {
       ],
       child: Consumer<ThemeModeProvider>(
         builder: (context, themeMode, _) => MaterialApp(
-          title: 'Coffee Shop',
+          title: 'Good Food Good Mood',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,

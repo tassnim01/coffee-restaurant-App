@@ -13,7 +13,7 @@ class ApkDownloadService {
     // Dossier temporaire de l'application
     final directory = await getTemporaryDirectory();
 
-    final apkPath = '${directory.path}/coffee_shop_update.apk';
+    final apkPath = '${directory.path}/good_food_good_mood_update.apk';
 
     final apkFile = File(apkPath);
 

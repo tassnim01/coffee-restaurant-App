@@ -76,10 +76,7 @@ class _CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = CategoryIcons.styleOf(category.iconKey);
-
     return Container(
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
@@ -92,66 +89,55 @@ class _CategoryCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(color: style.bg, shape: BoxShape.circle),
-            child: Icon(
-              CategoryIcons.byKey(category.iconKey),
-              color: style.fg,
-              size: 24,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 10,
+        ),
+        leading: CategoryIcons.badge(category.iconKey, size: 64),
+        title: Text(
+          category.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+        ),
+        subtitle: Text(
+          '$productCount produit${productCount > 1 ? 's' : ''}',
+          style: AppTextStyles.chip.copyWith(color: AppColors.gray),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              onPressed: onView,
+              tooltip: 'Voir',
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.visibility_outlined, size: 20),
             ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  category.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.productName,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  '$productCount produit${productCount > 1 ? 's' : ''}',
-                  style: AppTextStyles.chip.copyWith(color: AppColors.gray),
-                ),
-              ],
+            IconButton(
+              onPressed: onEdit,
+              tooltip: 'Modifier',
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.edit_outlined, size: 20),
             ),
-          ),
-          IconButton(
-            onPressed: onView,
-            tooltip: 'Voir',
-            visualDensity: VisualDensity.compact,
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.visibility_outlined, size: 20),
-          ),
-          IconButton(
-            onPressed: onEdit,
-            tooltip: 'Modifier',
-            visualDensity: VisualDensity.compact,
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.edit_outlined, size: 20),
-          ),
-          IconButton(
-            onPressed: onDelete,
-            tooltip: 'Supprimer',
-            visualDensity: VisualDensity.compact,
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            padding: EdgeInsets.zero,
-            icon: const Icon(
-              Icons.delete_outline_rounded,
-              size: 20,
-              color: AppColors.burgundy,
+            IconButton(
+              onPressed: onDelete,
+              tooltip: 'Supprimer',
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              padding: EdgeInsets.zero,
+              icon: const Icon(
+                Icons.delete_outline_rounded,
+                size: 20,
+                color: AppColors.burgundy,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -211,10 +211,12 @@ class HomeScreen extends StatelessWidget {
                   color: style.bg,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  CategoryIcons.byKey(c.iconKey),
-                  color: style.fg,
-                  size: 28,
+                child: Center(
+                  child: CategoryIcons.iconWidget(
+                    c.iconKey,
+                    size: 28,
+                    color: style.fg,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),

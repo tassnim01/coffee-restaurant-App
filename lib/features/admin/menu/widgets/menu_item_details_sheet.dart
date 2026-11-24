@@ -128,10 +128,12 @@ Future<void> showCategoryDetailsSheet(
                     color: iconStyle.bg,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    CategoryIcons.byKey(category.iconKey),
-                    color: iconStyle.fg,
-                    size: 26,
+                  child: Center(
+                    child: CategoryIcons.iconWidget(
+                      category.iconKey,
+                      size: 26,
+                      color: iconStyle.fg,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 14),

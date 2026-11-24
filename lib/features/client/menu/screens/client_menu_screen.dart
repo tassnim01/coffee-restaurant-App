@@ -99,11 +99,11 @@ class _ClientMenuScreenState extends State<ClientMenuScreen> {
 
   Widget _buildHeader(MenuProvider menu, String? categoryId) {
     var title = 'Menu';
-    var icon = Icons.restaurant_menu_rounded;
+    String? iconKey;
     for (final c in menu.categories) {
       if (c.id == categoryId) {
         title = c.name;
-        icon = CategoryIcons.byKey(c.iconKey);
+        iconKey = c.iconKey;
       }
     }
 
@@ -116,7 +116,19 @@ class _ClientMenuScreenState extends State<ClientMenuScreen> {
             color: AppColors.forestGreen.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, size: 21, color: AppColors.forestGreen),
+          child: Center(
+            child: iconKey == null
+                ? const Icon(
+                    Icons.restaurant_menu_rounded,
+                    size: 21,
+                    color: AppColors.forestGreen,
+                  )
+                : CategoryIcons.iconWidget(
+                    iconKey,
+                    size: 19,
+                    color: AppColors.forestGreen,
+                  ),
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(child: Text(title, style: AppTextStyles.screenTitle)),

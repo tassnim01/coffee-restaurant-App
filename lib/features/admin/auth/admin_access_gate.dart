@@ -248,8 +248,8 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                               ),
                               icon: Icon(
                                 _hidePassword
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
                               ),
                             ),
                           ),

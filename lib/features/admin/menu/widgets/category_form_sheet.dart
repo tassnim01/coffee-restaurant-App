@@ -114,7 +114,13 @@ class _CategoryFormSheetState extends State<_CategoryFormSheet> {
                         width: 2,
                       ),
                     ),
-                    child: Icon(e.value, color: style.fg, size: 22),
+                    child: Center(
+                      child: CategoryIcons.iconWidget(
+                        e.key,
+                        size: 22,
+                        color: style.fg,
+                      ),
+                    ),
                   ),
                 );
               }).toList(),

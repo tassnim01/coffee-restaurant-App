@@ -29,6 +29,8 @@ class DashboardStats {
         today.where((o) => test(o.status)).length;
 
     // Les commandes arrivent déjà triées de la plus récente à la plus ancienne.
+    final recentToday = today.take(5).toList();
+
     return DashboardStats(
       todayCount: today.length,
       todayRevenue: today.fold(0.0, (sum, o) => sum + o.total),
@@ -37,7 +39,7 @@ class DashboardStats {
       ),
       ready: count((s) => s == OrderStatus.ready),
       delivered: count((s) => s == OrderStatus.delivered),
-      recent: orders.take(5).toList(),
+      recent: recentToday,
     );
   }
 }

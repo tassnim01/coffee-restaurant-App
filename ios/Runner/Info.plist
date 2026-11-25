@@ -26,6 +26,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Face ID permet de vous connecter rapidement à votre compte.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>La caméra permet de prendre une photo de votre plat pour votre avis.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

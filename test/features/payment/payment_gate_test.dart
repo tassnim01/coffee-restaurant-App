@@ -66,7 +66,11 @@ void main() {
 
 class _UnpaidOrderRepository implements ClientOrderRepository {
   @override
-  Stream<List<RestaurantOrder>> watchOrdersOf(String userId) => Stream.value([
+  Stream<List<RestaurantOrder>> watchOrdersOf(
+    String userId, {
+    String? clientName,
+    String? clientPhone,
+  }) => Stream.value([
     RestaurantOrder(
       id: 'order-1',
       number: 1049,

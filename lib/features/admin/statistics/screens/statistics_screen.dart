@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/formatters.dart';
@@ -8,6 +9,7 @@ import '../../orders/providers/orders_provider.dart';
 import '../models/stats_data.dart';
 import '../widgets/kpi_card.dart';
 import '../widgets/sales_chart.dart';
+import '../widgets/ai_review_insights_card.dart';
 
 class StatisticsScreen extends StatefulWidget {
   final VoidCallback? onMenuTap;
@@ -23,17 +25,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   bool _showAll = false;
 
   BoxDecoration get _card => BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      );
+    color: AppColors.surface,
+    borderRadius: BorderRadius.circular(18),
+    border: Border.all(color: AppColors.border),
+    boxShadow: [
+      BoxShadow(
+        color: AppColors.black.withValues(alpha: 0.04),
+        blurRadius: 10,
+        offset: const Offset(0, 3),
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +53,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 children: [
                   IconButton(
                     onPressed:
-                        widget.onMenuTap ?? () => Navigator.of(context).maybePop(),
+                        widget.onMenuTap ??
+                        () => Navigator.of(context).maybePop(),
                     icon: Icon(
                       widget.onMenuTap != null
                           ? Icons.menu_rounded
@@ -63,7 +66,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   ),
                   const SizedBox(width: 4),
                   Expanded(
-                    child: Text('Statistiques', style: AppTextStyles.screenTitle),
+                    child: Text(
+                      'Statistiques',
+                      style: AppTextStyles.screenTitle,
+                    ),
                   ),
                 ],
               ),
@@ -101,6 +107,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             _buildChartCard(data),
                             const SizedBox(height: 14),
                             _buildTopDishes(data),
+                            const SizedBox(height: 14),
+                            const AiReviewInsightsCard(),
                           ],
                         ),
                       ),
@@ -118,8 +126,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         final selected = p == _period;
         return Expanded(
           child: Padding(
-            padding:
-                EdgeInsets.only(right: p == StatsPeriod.values.last ? 0 : 8),
+            padding: EdgeInsets.only(
+              right: p == StatsPeriod.values.last ? 0 : 8,
+            ),
             child: GestureDetector(
               onTap: () => setState(() => _period = p),
               child: AnimatedContainer(
@@ -237,8 +246,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 const SizedBox(height: 2),
                 Text(
                   '${dish.quantity} vente${dish.quantity > 1 ? 's' : ''}',
-                  style: AppTextStyles.chip
-                      .copyWith(color: AppColors.gray, fontSize: 12),
+                  style: AppTextStyles.chip.copyWith(
+                    color: AppColors.gray,
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 ClipRRect(

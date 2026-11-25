@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,13 +29,76 @@ class FirebaseClientOrderRepository implements ClientOrderRepository {
   }
 
   @override
-  Stream<List<RestaurantOrder>> watchOrdersOf(String userId) {
-    // Tri côté application : évite de créer un index composite Firestore.
-    return _orders.where('userId', isEqualTo: userId).snapshots().map((snap) {
-      final list = snap.docs.map(_fromDoc).toList()
+  Stream<List<RestaurantOrder>> watchOrdersOf(
+    String userId, {
+    String? clientName,
+    String? clientPhone,
+  }) {
+    late StreamController<List<RestaurantOrder>> controller;
+    StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? uidSubscription;
+    StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? nameSubscription;
+    StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? phoneSubscription;
+    var uidOrders = <RestaurantOrder>[];
+    var nameOrders = <RestaurantOrder>[];
+    var phoneOrders = <RestaurantOrder>[];
+
+    void emit() {
+      if (controller.isClosed) return;
+      final merged = <String, RestaurantOrder>{};
+      for (final order in [...uidOrders, ...nameOrders, ...phoneOrders]) {
+        merged[order.id] = order;
+      }
+      final list = merged.values.toList()
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      return list;
-    });
+      controller.add(list);
+    }
+
+    controller = StreamController<List<RestaurantOrder>>(
+      onListen: () {
+        uidSubscription = _orders
+            .where('userId', isEqualTo: userId)
+            .snapshots()
+            .listen((snapshot) {
+              uidOrders = snapshot.docs.map(_fromDoc).toList();
+              emit();
+            }, onError: controller.addError);
+
+        final exactName = clientName?.trim();
+        if (exactName != null && exactName.isNotEmpty) {
+          nameSubscription = _orders
+              .where('clientName', isEqualTo: exactName)
+              .snapshots()
+              .listen((snapshot) {
+                nameOrders = snapshot.docs
+                    .map(_fromDoc)
+                    .where((order) => order.userId == null)
+                    .toList();
+                emit();
+              }, onError: controller.addError);
+        }
+
+        final exactPhone = clientPhone?.trim();
+        if (exactPhone != null && exactPhone.isNotEmpty) {
+          phoneSubscription = _orders
+              .where('clientPhone', isEqualTo: exactPhone)
+              .snapshots()
+              .listen((snapshot) {
+                phoneOrders = snapshot.docs
+                    .map(_fromDoc)
+                    .where((order) => order.userId == null)
+                    .toList();
+                emit();
+              }, onError: controller.addError);
+        }
+      },
+      onCancel: () async {
+        await uidSubscription?.cancel();
+        await nameSubscription?.cancel();
+        await phoneSubscription?.cancel();
+      },
+    );
+
+    return controller.stream;
   }
 
   @override

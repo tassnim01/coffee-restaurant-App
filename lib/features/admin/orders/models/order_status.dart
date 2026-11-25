@@ -4,10 +4,32 @@ import '../../../../core/theme/app_colors.dart';
 
 enum OrderStatus { pending, received, preparing, ready, delivered }
 
-OrderStatus orderStatusFromKey(String? key) => OrderStatus.values.firstWhere(
-  (s) => s.name == key,
-  orElse: () => OrderStatus.received,
-);
+OrderStatus orderStatusFromKey(String? key) {
+  final normalized = key?.trim().toLowerCase();
+  switch (normalized) {
+    case 'pending':
+    case 'en attente':
+      return OrderStatus.pending;
+    case 'received':
+    case 'reçue':
+    case 'recu':
+      return OrderStatus.received;
+    case 'preparing':
+    case 'en cours':
+      return OrderStatus.preparing;
+    case 'ready':
+    case 'prête':
+    case 'prete':
+      return OrderStatus.ready;
+    case 'delivered':
+    case 'livrée':
+    case 'livre':
+    case 'livré':
+      return OrderStatus.delivered;
+    default:
+      return OrderStatus.received;
+  }
+}
 
 extension OrderStatusX on OrderStatus {
   String get label {

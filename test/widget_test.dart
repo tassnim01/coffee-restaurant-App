@@ -144,8 +144,11 @@ class _FakeAuthRepository implements AuthRepository {
 
 class _FakeClientOrderRepository implements ClientOrderRepository {
   @override
-  Stream<List<RestaurantOrder>> watchOrdersOf(String userId) =>
-      Stream.value([]);
+  Stream<List<RestaurantOrder>> watchOrdersOf(
+    String userId, {
+    String? clientName,
+    String? clientPhone,
+  }) => Stream.value([]);
 
   @override
   Future<RestaurantOrder> createOrder({

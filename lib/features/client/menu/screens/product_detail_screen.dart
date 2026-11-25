@@ -10,6 +10,9 @@ import '../../../admin/menu/models/product.dart';
 import '../../../admin/menu/models/supplement.dart';
 import '../../cart/models/cart_item.dart';
 import '../../cart/providers/cart_provider.dart';
+import '../../../reviews/providers/reviews_provider.dart';
+import '../../reviews/screens/product_reviews_screen.dart';
+import '../../reviews/screens/write_review_screen.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -29,6 +32,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _quantity = 1;
   final Set<int> _selected = {};
   bool _favorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ReviewsProvider>().watchProduct(widget.product.id);
+    });
+  }
 
   List<Supplement> get _chosen => [
     for (final i in _selected) widget.product.supplements[i],
@@ -159,6 +170,76 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             for (var i = 0; i < p.supplements.length; i++)
               _supplementRow(i, p.supplements[i]),
           ],
+          const SizedBox(height: 24),
+          _buildReviews(p),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviews(Product p) {
+    final reviewsProvider = context.watch<ReviewsProvider>();
+    final reviews = reviewsProvider.reviewsFor(p.id);
+    final average = reviews.isEmpty
+        ? 0.0
+        : reviews.fold<int>(0, (sum, review) => sum + review.rating) /
+              reviews.length;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Text(
+            reviews.isEmpty ? '0' : average.toStringAsFixed(1),
+            style: AppTextStyles.screenTitle.copyWith(fontSize: 20),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: List.generate(
+                    5,
+                    (index) => Icon(
+                      index < average.round()
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      size: 17,
+                      color: AppColors.warmBeige,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${reviews.length} avis',
+                  style: AppTextStyles.chip.copyWith(color: AppColors.gray),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => ProductReviewsScreen(product: p),
+              ),
+            ),
+            child: const Text('Voir les avis'),
+          ),
+          IconButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => WriteReviewScreen(product: p)),
+            ),
+            tooltip: 'Écrire un avis',
+            icon: const Icon(
+              Icons.rate_review_outlined,
+              color: AppColors.forestGreen,
+            ),
+          ),
         ],
       ),
     );

@@ -13,6 +13,8 @@ class ClientOrdersProvider extends ChangeNotifier {
   StreamSubscription<List<RestaurantOrder>>? _subscription;
 
   String? _uid;
+  String? _clientName;
+  String? _clientPhone;
   List<RestaurantOrder> _orders = [];
   bool _isLoading = false;
   bool _disposed = false;
@@ -23,9 +25,17 @@ class ClientOrdersProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   /// Appelé quand l'utilisateur connecté change.
-  void setUser(String? uid) {
-    if (uid == _uid) return;
+  void setUser(String? uid, {String? clientName, String? clientPhone}) {
+    final normalizedName = clientName?.trim();
+    final normalizedPhone = clientPhone?.trim();
+    if (uid == _uid &&
+        normalizedName == _clientName &&
+        normalizedPhone == _clientPhone) {
+      return;
+    }
     _uid = uid;
+    _clientName = normalizedName;
+    _clientPhone = normalizedPhone;
     _subscription?.cancel();
     _orders = [];
 
@@ -39,7 +49,7 @@ class ClientOrdersProvider extends ChangeNotifier {
 
     _isLoading = true;
     _subscription = _repository
-        .watchOrdersOf(uid)
+        .watchOrdersOf(uid, clientName: clientName, clientPhone: clientPhone)
         .listen(
           (data) {
             _orders = data;

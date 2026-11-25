@@ -41,7 +41,26 @@ service cloud.firestore {
 
     match /orders/{orderId} {
       allow create: if signedIn();
-      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow read: if signedIn()
+        && (isAdmin()
+          || resource.data.userId == request.auth.uid
+          || (resource.data.userId == null
+            && (resource.data.clientName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name
+              || resource.data.clientPhone == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.phone)));
+      allow update, delete: if isAdmin();
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.productId is string
+        && request.resource.data.userName is string
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.comment is string
+        && request.resource.data.photoUrl is string;
       allow update, delete: if isAdmin();
     }
 

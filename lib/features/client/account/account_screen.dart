@@ -13,6 +13,7 @@ import '../../auth/widgets/auth_sheet.dart';
 import '../orders/screens/my_orders_screen.dart';
 import '../settings/screens/client_settings_screen.dart';
 import '../settings/screens/profile_screen.dart';
+import '../reviews/screens/my_reviews_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -247,6 +248,15 @@ class AccountScreen extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (_) =>
                                 const MyOrdersScreen(initialHistory: true),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _button(
+                        'Mes avis',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const MyReviewsScreen(),
                           ),
                         ),
                       ),

@@ -3,7 +3,11 @@ import '../../../admin/orders/models/restaurant_order.dart';
 
 abstract class ClientOrderRepository {
   /// Flux temps réel des commandes d'un client.
-  Stream<List<RestaurantOrder>> watchOrdersOf(String userId);
+  Stream<List<RestaurantOrder>> watchOrdersOf(
+    String userId, {
+    String? clientName,
+    String? clientPhone,
+  });
 
   /// Enregistre la commande (statut "reçue") avec un numéro automatique.
   Future<RestaurantOrder> createOrder({

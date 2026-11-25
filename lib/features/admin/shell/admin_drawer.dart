@@ -27,6 +27,7 @@ class AdminDrawer extends StatelessWidget {
     _DrawerEntry(Icons.bar_chart_rounded, 'Statistiques'),
     _DrawerEntry(Icons.restaurant_menu_rounded, 'Menu'),
     _DrawerEntry(Icons.people_outline_rounded, 'Clients'),
+    _DrawerEntry(Icons.rate_review_outlined, 'Avis clients'),
     _DrawerEntry(Icons.payments_outlined, 'Paiements'),
     _DrawerEntry(Icons.settings_outlined, 'Paramètres'),
   ];
